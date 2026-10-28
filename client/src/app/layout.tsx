@@ -11,7 +11,7 @@ export default function RootLayout({
   return (
     <html lang="zh-CN">
       <head>
-        <title>吉宠宠物店</title>
+        <title>吉宠宠物</title>
         <meta content="width=device-width, initial-scale=1" name="viewport" />
         <meta name="description" content="宠物店管理系统 - 让宠物护理更简单" />
         <link

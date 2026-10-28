@@ -271,6 +271,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         breakpoint="lg"
         collapsedWidth={80}
         width={220}
+        trigger={null}
         style={{
           overflow: "hidden",
           height: "100vh",
@@ -296,7 +297,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
             flexShrink: 0,
           }}
         >
-          {collapsed ? "🐾" : "🐾 爱尚宠物"}
+          {collapsed ? "🐾" : "🐾 吉宠宠物"}
         </div>
 
         {/* 菜单容器 - 可滚动 */}
@@ -358,7 +359,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
 
             <Dropdown menu={{ items: userMenuItems }} placement="bottomRight">
               <Space style={{ cursor: "pointer" }}>
-                <Avatar icon={<UserOutlined />} />
+                <Avatar src="/icon.jpg" />
                 <Text>{user?.name}</Text>
               </Space>
             </Dropdown>

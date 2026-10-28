@@ -24,6 +24,18 @@ export function getMe() {
   return request<{ me: Me }>('/miniprogram/me')
 }
 
+export function updateMyProfile(data: { name?: string; avatarUrl?: string }) {
+  return request<{ me: Me }>('/miniprogram/me', { method: 'PATCH', data })
+}
+
+export function getAppointmentAvailability(startDate: string, endDate: string) {
+  return request<{ bookedTimes: string[] }>(
+    `/miniprogram/appointments/availability?startDate=${encodeURIComponent(
+      startDate,
+    )}&endDate=${encodeURIComponent(endDate)}`,
+  )
+}
+
 export function listPets() {
   return request<{ pets: Pet[] }>('/miniprogram/pets')
 }

@@ -12,6 +12,17 @@ export enum AppointmentStatus {
   PENDING_PAYMENT = 'PENDING_PAYMENT',
 }
 
+// 预约时段：整店独占，30 分钟一段
+export const APPOINTMENT_SLOT_MINUTES = 30;
+
+// 以下状态视为"占用时段"（可阻断他人预约同一时段）
+export const BLOCKING_APPOINTMENT_STATUSES: AppointmentStatus[] = [
+  AppointmentStatus.PENDING,
+  AppointmentStatus.CONFIRMED,
+  AppointmentStatus.PENDING_PAYMENT,
+  AppointmentStatus.DONE,
+];
+
 interface AppointmentProps {
   petId: string;
   serviceId: string;

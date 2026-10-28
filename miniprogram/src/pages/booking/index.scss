@@ -62,6 +62,43 @@
   min-height: 100px;
 }
 
+.booking__slots-title {
+  display: block;
+  font-size: 28px;
+  font-weight: bold;
+  color: #333;
+  margin: 20px 0 16px;
+}
+
+.booking__slots {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 16px;
+}
+
+.booking__slot {
+  width: calc((100% - 48px) / 4);
+  padding: 16px 0;
+  text-align: center;
+  font-size: 26px;
+  color: #333;
+  border: 1px solid #e5e5e5;
+  border-radius: 8px;
+  background: #fff;
+}
+
+.booking__slot--selected {
+  color: #fff;
+  background: #07c160;
+  border-color: #07c160;
+}
+
+.booking__slot--booked {
+  color: #ccc;
+  background: #f5f5f5;
+  border-color: #f0f0f0;
+}
+
 .booking__submit {
   position: fixed;
   left: 30px;

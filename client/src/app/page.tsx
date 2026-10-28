@@ -72,12 +72,12 @@ export default function Home() {
         }}
       >
         <div style={{ maxWidth: 600, textAlign: "center" }}>
-          <Title level={1}>🐾 吉宠宠物店后台管理 🐾</Title>
+          <Title level={1}>🐾 吉宠宠物店 🐾</Title>
 
 
           <Link href="/dashboard">
             <Button type="primary" size="large">
-              进入系统
+              登录
             </Button>
           </Link>
         </div>

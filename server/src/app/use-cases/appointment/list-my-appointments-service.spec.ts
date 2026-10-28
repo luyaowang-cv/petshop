@@ -25,6 +25,11 @@ class InMemoryAppointmentRepository extends AppointmentRepository {
   async countByPetId(id: string): Promise<number> {
     return this.appointments.filter((a) => a.petId === id).length;
   }
+  async findManyByTimeRange(startDate: Date, endDate: Date): Promise<Appointment[]> {
+    return this.appointments.filter(
+      (a) => a.appointmentTime >= startDate && a.appointmentTime < endDate,
+    );
+  }
   async countByCustomerId(_id: string): Promise<number> { return 0; }
 }
 

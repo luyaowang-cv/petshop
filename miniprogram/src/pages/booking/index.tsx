@@ -1,9 +1,19 @@
 import { useState } from 'react'
 import Taro, { useLoad, useRouter } from '@tarojs/taro'
 import { View, Text, Picker, Textarea } from '@tarojs/components'
-import { createAppointment, listPets, listServices } from '../../services/api'
+import {
+  createAppointment,
+  getAppointmentAvailability,
+  listPets,
+  listServices,
+} from '../../services/api'
 import type { Pet, PetshopService } from '../../types'
 import './index.scss'
+
+// 预约时段：上午 / 下午，30 分钟一段（整店独占）
+const MORNING_SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30']
+const AFTERNOON_SLOTS = ['14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30']
+const SLOT_MS = 30 * 60 * 1000
 
 export default function Booking() {
   const router = useRouter()
@@ -14,6 +24,7 @@ export default function Booking() {
   const [petIndex, setPetIndex] = useState(0)
   const [date, setDate] = useState('')
   const [time, setTime] = useState('')
+  const [bookedTimes, setBookedTimes] = useState<string[]>([])
   const [note, setNote] = useState('')
   const [loading, setLoading] = useState(true)
 
@@ -36,6 +47,56 @@ export default function Booking() {
     }
   }
 
+  const onDateChange = async (e: any) => {
+    const next = e.detail.value
+    setDate(next)
+    setTime('')
+    if (!next) {
+      setBookedTimes([])
+      return
+    }
+    try {
+      // 后端按 UTC 范围查询；起始/结束用与提交预约相同的本地时间约定
+      const startDate = new Date(`${next}T09:00:00`).toISOString()
+      const endDate = new Date(`${next}T18:00:00`).toISOString()
+      const res = await getAppointmentAvailability(startDate, endDate)
+      setBookedTimes(res.bookedTimes)
+    } catch {
+      setBookedTimes([])
+    }
+  }
+
+  const isSlotBooked = (slot: string) => {
+    const startMs = new Date(`${date}T${slot}:00`).getTime()
+    const endMs = startMs + SLOT_MS
+    return bookedTimes.some((iso) => {
+      const ms = new Date(iso).getTime()
+      return ms >= startMs && ms < endMs
+    })
+  }
+
+  const renderSlots = (slots: string[]) => (
+    <View className='booking__slots'>
+      {slots.map((slot) => {
+        const booked = isSlotBooked(slot)
+        const selected = time === slot
+        return (
+          <View
+            key={slot}
+            className={`booking__slot ${
+              booked ? 'booking__slot--booked' : ''
+            } ${selected ? 'booking__slot--selected' : ''}`}
+            onClick={() => {
+              if (!booked) setTime(slot)
+            }}
+          >
+            <Text>{booked ? `${slot} 已满` : slot}</Text>
+          </View>
+        )
+      })}
+    </View>
+  )
+
   const goAddPet = () => {
     Taro.navigateTo({ url: '/pages/pet-edit/index' })
   }
@@ -48,6 +109,10 @@ export default function Booking() {
     }
     if (!date || !time) {
       Taro.showToast({ title: '请选择预约时间', icon: 'none' })
+      return
+    }
+    if (isSlotBooked(time)) {
+      Taro.showToast({ title: '该时间段已被预约', icon: 'none' })
       return
     }
     const appointmentTime = new Date(`${date}T${time}:00`)
@@ -75,6 +140,8 @@ export default function Booking() {
   if (loading) {
     return <View className='empty'>加载中…</View>
   }
+
+  const submitDisabled = pets.length === 0 || !date || !time
 
   return (
     <View className='booking'>
@@ -112,23 +179,22 @@ export default function Booking() {
             <Picker
               mode='date'
               value={date}
-              onChange={(e) => setDate(e.detail.value)}
+              onChange={onDateChange}
             >
               <View className='form-row__picker'>{date || '请选择'} ›</View>
             </Picker>
           </View>
-          <View className='form-row'>
-            <Text className='form-row__label'>预约时间</Text>
-            <Picker
-              mode='time'
-              value={time}
-              onChange={(e) => setTime(e.detail.value)}
-            >
-              <View className='form-row__picker'>{time || '请选择'} ›</View>
-            </Picker>
-          </View>
         </View>
       )}
+
+      {date ? (
+        <View className='card'>
+          <Text className='booking__slots-title'>上午</Text>
+          {renderSlots(MORNING_SLOTS)}
+          <Text className='booking__slots-title'>下午</Text>
+          {renderSlots(AFTERNOON_SLOTS)}
+        </View>
+      ) : null}
 
       <View className='card'>
         <View className='form-row form-row--column'>
@@ -144,7 +210,7 @@ export default function Booking() {
 
       <View
         className={`booking__submit btn-primary ${
-          pets.length === 0 ? 'btn-disabled' : ''
+          submitDisabled ? 'btn-disabled' : ''
         }`}
         onClick={onSubmit}
       >

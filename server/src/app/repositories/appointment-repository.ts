@@ -17,6 +17,7 @@ export abstract class AppointmentRepository {
   abstract save(appointment: Appointment): Promise<void>
   abstract findById(id: string): Promise<Appointment | null>;
   abstract findManyByCustomerId(customerId: string): Promise<Appointment[]>;
+  abstract findManyByTimeRange(startDate: Date, endDate: Date): Promise<Appointment[]>;
   abstract findManyPaginated(query: FindManyAppointmentsQueryPaginatedSorted): Promise<PaginatedResult<Appointment>>;
   abstract delete(id: string): Promise<void>
   abstract countByPetId(id: string): Promise<number>

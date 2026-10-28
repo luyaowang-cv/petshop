@@ -57,6 +57,10 @@ class InMemoryAppointmentRepository extends AppointmentRepository {
     return this.appointmentsByPet;
   }
 
+  async findManyByTimeRange(_startDate: Date, _endDate: Date): Promise<Appointment[]> {
+    return [];
+  }
+
   async countByCustomerId(_id: string): Promise<number> {
     return 0;
   }

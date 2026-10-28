@@ -13,7 +13,9 @@ import { ListActivePetshopServices } from '@app/use-cases/petshop-service/list-a
 import { ScheduleMyAppointmentService } from '@app/use-cases/appointment/schedule-my-appointment-service';
 import { ListMyAppointmentsService } from '@app/use-cases/appointment/list-my-appointments-service';
 import { CancelMyAppointmentService } from '@app/use-cases/appointment/cancel-my-appointment-service';
+import { GetAppointmentAvailabilityService } from '@app/use-cases/appointment/get-appointment-availability-service';
 import { GetMyMemberInfoService } from '@app/use-cases/customer/get-my-member-info-service';
+import { UpdateMyProfileService } from '@app/use-cases/customer/update-my-profile-service';
 import { UploadImageService } from '@app/use-cases/image/upload-image-service';
 import { ImageStorage } from '@app/providers/image-storage';
 import { LocalImageStorage } from '@infra/providers/local-image-storage';
@@ -45,7 +47,9 @@ import { MiniprogramUploadController } from './miniprogram-upload.controller';
     ScheduleMyAppointmentService,
     ListMyAppointmentsService,
     CancelMyAppointmentService,
+    GetAppointmentAvailabilityService,
     GetMyMemberInfoService,
+    UpdateMyProfileService,
     UploadImageService,
     {
       provide: ImageStorage,

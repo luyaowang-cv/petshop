@@ -65,6 +65,11 @@ class InMemoryAppointmentRepository extends AppointmentRepository {
   async findManyByCustomerId(customerId: string): Promise<Appointment[]> {
     return this.appointments.filter((a) => a.pet?.ownerId === customerId);
   }
+  async findManyByTimeRange(startDate: Date, endDate: Date): Promise<Appointment[]> {
+    return this.appointments.filter(
+      (a) => a.appointmentTime >= startDate && a.appointmentTime < endDate,
+    );
+  }
   async findManyPaginated() {
     return { data: this.appointments, meta: { page: 1, lastPage: 1, pageSize: 10, total: this.appointments.length } };
   }
@@ -170,5 +175,51 @@ describe('ScheduleMyAppointmentService', () => {
         appointmentTime: new Date(Date.now() - 3600 * 1000),
       }),
     ).rejects.toBeInstanceOf(BadRequest);
+  });
+
+  it('同一时段已有占用中的预约时抛 BadRequest（整店独占）', async () => {
+    const pet = makePet('customer-1');
+    const svc = makeService();
+    await petRepository.create(pet);
+    await serviceRepository.create(svc);
+
+    await appointmentRepository.create(new Appointment({
+      petId: 'other-pet',
+      serviceId: svc.id,
+      appointmentTime: futureTime,
+      status: AppointmentStatus.CONFIRMED,
+    }));
+
+    await expect(
+      service.execute({
+        customerId: 'customer-1',
+        petId: pet.id,
+        serviceId: svc.id,
+        appointmentTime: futureTime,
+      }),
+    ).rejects.toBeInstanceOf(BadRequest);
+  });
+
+  it('同一时段只有已取消预约时可正常提交', async () => {
+    const pet = makePet('customer-1');
+    const svc = makeService();
+    await petRepository.create(pet);
+    await serviceRepository.create(svc);
+
+    await appointmentRepository.create(new Appointment({
+      petId: 'other-pet',
+      serviceId: svc.id,
+      appointmentTime: futureTime,
+      status: AppointmentStatus.CANCELED,
+    }));
+
+    await expect(
+      service.execute({
+        customerId: 'customer-1',
+        petId: pet.id,
+        serviceId: svc.id,
+        appointmentTime: futureTime,
+      }),
+    ).resolves.toBeDefined();
   });
 });

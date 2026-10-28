@@ -1,4 +1,4 @@
-import { Body, Controller, Get, Param, Post, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Param, Post, Query, UseGuards } from '@nestjs/common';
 import { PublicRoute } from '@infra/auth/decorators/public-route-decorator';
 import { CustomerJwtAuthGuard } from '@infra/auth/customer-jwt-auth.guard';
 import { CurrentCustomer } from '@infra/auth/decorators/current-customer-decorator';
@@ -6,8 +6,10 @@ import { CustomerAuthContext } from '@infra/auth/customer-jwt.strategy';
 import { ScheduleMyAppointmentService } from '@app/use-cases/appointment/schedule-my-appointment-service';
 import { ListMyAppointmentsService } from '@app/use-cases/appointment/list-my-appointments-service';
 import { CancelMyAppointmentService } from '@app/use-cases/appointment/cancel-my-appointment-service';
+import { GetAppointmentAvailabilityService } from '@app/use-cases/appointment/get-appointment-availability-service';
 import { AppointmentViewModel } from '../view-models/appointment-view-model';
 import { CreateMyAppointmentBody } from './dtos/create-my-appointment-body';
+import { GetAppointmentAvailabilityQuery } from './dtos/get-appointment-availability-query';
 
 @PublicRoute() // 跳过全局 admin JWT 守卫，改用下方顾客守卫
 @UseGuards(CustomerJwtAuthGuard)
@@ -17,7 +19,19 @@ export class MiniprogramAppointmentController {
     private scheduleMyAppointmentService: ScheduleMyAppointmentService,
     private listMyAppointmentsService: ListMyAppointmentsService,
     private cancelMyAppointmentService: CancelMyAppointmentService,
+    private getAppointmentAvailabilityService: GetAppointmentAvailabilityService,
   ) {}
+
+  @Get('availability')
+  async availability(@Query() query: GetAppointmentAvailabilityQuery) {
+    const { bookedTimes } = await this.getAppointmentAvailabilityService.execute(
+      {
+        startDate: query.startDate,
+        endDate: query.endDate,
+      },
+    );
+    return { bookedTimes };
+  }
 
   @Get()
   async list(@CurrentCustomer() customer: CustomerAuthContext) {

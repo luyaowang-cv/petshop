@@ -43,6 +43,26 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
     return AppointmentMapper.toDomain(appointment)
   }
 
+  async findManyByTimeRange(startDate: Date, endDate: Date): Promise<Appointment[]> {
+    const appointments = await this.prismaService.appointment.findMany({
+      where: {
+        appointmentTime: {
+          gte: startDate,
+          lt: endDate,
+        },
+      },
+      include: {
+        pet: true,
+        service: true,
+      },
+      orderBy: {
+        appointmentTime: 'asc',
+      },
+    });
+
+    return appointments.map(AppointmentMapper.toDomain);
+  }
+
   async findManyByCustomerId(customerId: string): Promise<Appointment[]> {
     const appointments = await this.prismaService.appointment.findMany({
       where: {
