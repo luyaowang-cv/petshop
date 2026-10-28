@@ -1,8 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { ProductOrderRepository } from '@app/repositories/product-order-repository';
-import { AppointmentRepository } from '@app/repositories/appointment-repository';
-import { ProductOrderStatus } from '@app/entities/product-order';
-import { AppointmentStatus } from '@app/entities/appointment';
+import { FinanceRecordRepository } from '@app/repositories/finance-record-repository';
+import { FinanceType } from '@app/entities/finance-record';
 
 export interface RevenueTrendPoint {
   date: string; // YYYY-MM-DD
@@ -26,79 +24,54 @@ export interface GetRevenueStatisticsRequest {
   endDate: Date;
 }
 
+const SERVICE_INCOME_CATEGORY = '服务收入';
+const PRODUCT_INCOME_CATEGORY = '商品销售';
+
 @Injectable()
 export class GetRevenueStatisticsService {
-  constructor(
-    private productOrderRepository: ProductOrderRepository,
-    private appointmentRepository: AppointmentRepository,
-  ) {}
+  constructor(private financeRecordRepository: FinanceRecordRepository) {}
 
   async execute(
     request: GetRevenueStatisticsRequest,
   ): Promise<RevenueStatistics> {
     const { startDate, endDate } = request;
 
-    // 获取商品订单（只统计已完成的）
-    const { orders: productOrders } =
-      await this.productOrderRepository.findMany(
-        {
-          status: ProductOrderStatus.COMPLETED,
-          startDate,
-          endDate,
-        },
-        undefined,
-        undefined,
-      );
-
-    // 获取服务订单（只统计已完成的预约）
-    const { data: serviceOrders } =
-      await this.appointmentRepository.findManyPaginated({
-        status: AppointmentStatus.COMPLETED,
-        startDate,
-        endDate,
-        page: 1,
-        pageSize: 10000, // 获取所有数据
-      });
-
-    // 计算商品收入
-    let productRevenue = 0;
-    productOrders.forEach((order) => {
-      productRevenue += order.totalAmount;
-    });
-
-    // 计算服务收入
-    let serviceRevenue = 0;
-    serviceOrders.forEach((appointment: any) => {
-      if (appointment.service) {
-        serviceRevenue += appointment.service.value;
-      }
-    });
-
-    const totalRevenue = productRevenue + serviceRevenue;
-    const totalOrders = productOrders.length + serviceOrders.length;
-
-    // 计算收入趋势
-    const revenueTrend = this.calculateRevenueTrend(
-      productOrders,
-      serviceOrders,
+    // 收入以“完成/收款时间”落库在 FinanceRecord，直接按日期范围统计，
+    // 避免用预约时间(appointmentTime)导致刚完成的服务被归到错误日期而不入账。
+    const records = await this.financeRecordRepository.findByDateRange(
       startDate,
       endDate,
+      FinanceType.INCOME,
     );
+
+    const serviceRecords = records.filter(
+      (r) => r.category === SERVICE_INCOME_CATEGORY,
+    );
+    const productRecords = records.filter(
+      (r) => r.category === PRODUCT_INCOME_CATEGORY,
+    );
+
+    const serviceRevenue = this.sumAmount(serviceRecords);
+    const productRevenue = this.sumAmount(productRecords);
+    const totalRevenue = serviceRevenue + productRevenue;
 
     return {
       totalRevenue: totalRevenue / 100, // 转换为元
-      productRevenue: productRevenue / 100, // 转换为元
-      serviceRevenue: serviceRevenue / 100, // 转换为元
-      totalOrders,
-      productOrders: productOrders.length,
-      serviceOrders: serviceOrders.length,
-      revenueTrend,
+      productRevenue: productRevenue / 100,
+      serviceRevenue: serviceRevenue / 100,
+      totalOrders: serviceRecords.length + productRecords.length,
+      productOrders: productRecords.length,
+      serviceOrders: serviceRecords.length,
+      revenueTrend: this.calculateRevenueTrend(records, startDate, endDate),
     };
   }
 
+  private sumAmount(records: { amount: number }[]): number {
+    return records.reduce((sum, r) => sum + r.amount, 0);
+  }
+
   private calculateRevenueTrend(
-    productOrders: any[],
-    serviceOrders: any[],
+    records: { amount: number; category: string; date: Date }[],
     startDate: Date,
     endDate: Date,
   ): RevenueTrendPoint[] {
@@ -110,37 +83,23 @@ export class GetRevenueStatisticsService {
       const dayEnd = new Date(current);
       dayEnd.setDate(dayEnd.getDate() + 1);
 
-      // 筛选当天的商品订单
-      const dayProductOrders = productOrders.filter((order) => {
-        const orderDate = new Date(order.createdAt);
-        return orderDate >= dayStart && orderDate < dayEnd;
+      const dayRecords = records.filter((r) => {
+        const recordDate = new Date(r.date);
+        return recordDate >= dayStart && recordDate < dayEnd;
       });
 
-      // 筛选当天的服务订单
-      const dayServiceOrders = serviceOrders.filter((appointment: any) => {
-        const appointmentDate = new Date(appointment.appointmentTime);
-        return appointmentDate >= dayStart && appointmentDate < dayEnd;
-      });
-
-      // 计算当天商品收入
-      let dayProductRevenue = 0;
-      dayProductOrders.forEach((order) => {
-        dayProductRevenue += order.totalAmount;
-      });
-
-      // 计算当天服务收入
-      let dayServiceRevenue = 0;
-      dayServiceOrders.forEach((appointment: any) => {
-        if (appointment.service) {
-          dayServiceRevenue += appointment.service.value;
-        }
-      });
+      const dayServiceRevenue = this.sumAmount(
+        dayRecords.filter((r) => r.category === SERVICE_INCOME_CATEGORY),
+      );
+      const dayProductRevenue = this.sumAmount(
+        dayRecords.filter((r) => r.category === PRODUCT_INCOME_CATEGORY),
+      );
 
       trendData.push({
         date: this.formatDate(current),
-        productRevenue: dayProductRevenue / 100, // 转换为元
-        serviceRevenue: dayServiceRevenue / 100, // 转换为元
-        totalRevenue: (dayProductRevenue + dayServiceRevenue) / 100, // 转换为元
+        productRevenue: dayProductRevenue / 100,
+        serviceRevenue: dayServiceRevenue / 100,
+        totalRevenue: (dayProductRevenue + dayServiceRevenue) / 100,
       });
 
       current.setDate(current.getDate() + 1);

@@ -23,8 +23,6 @@ import {
   CreditCardOutlined,
   BarChartOutlined,
   ShopOutlined,
-  MessageOutlined,
-  InfoCircleOutlined,
   LoadingOutlined,
 } from "@ant-design/icons";
 import { usePathname, useRouter } from "next/navigation";
@@ -141,16 +139,6 @@ const menuItems: MenuProps["items"] = [
         key: "/dashboard/settings/payment",
         icon: <CreditCardOutlined />,
         label: <Link href="/dashboard/settings/payment">支付设置</Link>,
-      },
-      {
-        key: "/dashboard/settings/sms",
-        icon: <MessageOutlined />,
-        label: <Link href="/dashboard/settings/sms">短信设置</Link>,
-      },
-      {
-        key: "/dashboard/about",
-        icon: <InfoCircleOutlined />,
-        label: <Link href="/dashboard/about">关于系统</Link>,
       },
     ],
   },
@@ -303,7 +291,7 @@ export function DashboardLayout({ children }: DashboardLayoutProps) {
         {/* 菜单容器 - 可滚动 */}
         <div
           style={{
-            flex: 1,
+            height: "calc(100vh - 64px)",
             overflowY: "auto",
             overflowX: "hidden",
             position: "relative",
