@@ -1,0 +1,58 @@
+# 阶段 A 部署：只起后端。复用首尔那台机器上 job-assistant 的 Caddy（反代/HTTPS）
+# 和 Postgres（数据库），不另起 Caddy、不另起数据库，省 2G 小内存。
+#
+# 用法（在服务器 ~/petshop/server 目录）：
+#   1) 先建库建用户（见 docs/miniprogram-mvp-deploy.md）
+#   2) 把密钥写进同目录 .env
+#   3) docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: petshop-api:latest
+    container_name: petshop-backend
+    restart: unless-stopped
+
+    # 这台机器 2G，和 job-assistant 的 db/web/caddy 共用，给后端设死上限。
+    mem_limit: 512m
+    environment:
+      PORT: 3333
+      NODE_ENV: production
+      DB_URL: postgresql://petshop:${PETSHOP_DB_PASSWORD:?请在 .env 设置 PETSHOP_DB_PASSWORD}@job-assistant-db:5432/petshop?schema=public
+      JWT_SECRET_KEY: ${JWT_SECRET_KEY:?请在 .env 设置 JWT_SECRET_KEY}
+      JWT_REFRESH_SECRET_KEY: ${JWT_REFRESH_SECRET_KEY:?请在 .env 设置 JWT_REFRESH_SECRET_KEY}
+      CUSTOMER_JWT_SECRET_KEY: ${CUSTOMER_JWT_SECRET_KEY:?请在 .env 设置 CUSTOMER_JWT_SECRET_KEY}
+      # 启动时必填，缺了会崩（CryptoAesEncrypter 构造时校验）
+      SMS_ENCRYPTION_KEY: ${SMS_ENCRYPTION_KEY:?请在 .env 设置 SMS_ENCRYPTION_KEY}
+      ADMIN_PASSWORD: ${ADMIN_PASSWORD:?请在 .env 设置 ADMIN_PASSWORD}
+      # 真机登录需要真实小程序凭证；留空则走 Mock（仅本地联调）
+      WECHAT_APP_ID: ${WECHAT_APP_ID:-}
+      WECHAT_APP_SECRET: ${WECHAT_APP_SECRET:-}
+      NODE_OPTIONS: --max-old-space-size=384
+
+    # 不映射宿主机端口：HTTPS 由 job-assistant 的 Caddy 反代（见 Caddyfile 片段）
+    expose:
+      - "3333"
+
+    volumes:
+      - uploads:/app/uploads
+
+    networks:
+      - job-assistant_default
+
+    logging:
+      driver: json-file
+      options:
+        max-size: "10m"
+        max-file: "3"
+
+volumes:
+  uploads:
+
+networks:
+  # 复用 job-assistant 项目的默认网络：这样 Caddy 能反代到 petshop-backend:3333，
+  # 后端也能连到 job-assistant-db:5432。若网络名不是这个，用 docker network ls 核对后改。
+  job-assistant_default:
+    external: true

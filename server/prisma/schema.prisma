@@ -1,0 +1,412 @@
+generator client {
+  provider = "prisma-client-js"
+  // Prisma 5.x 自动检测 OpenSSL 版本有 bug：在 Debian 12(OpenSSL 3) 上会错误地
+  // 生成 debian-openssl-1.1.x 引擎，运行时报 libssl.so.1.1 缺失崩溃。
+  // 显式指定 OpenSSL 3 引擎（native 保留给本地 Windows 开发）。
+  binaryTargets = ["native", "debian-openssl-3.0.x"]
+}
+
+generator erd {
+  provider = "prisma-erd-generator"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DB_URL")
+}
+
+model Appointment {
+  id              String            @id @default(uuid())
+  petId           String
+  serviceId       String?
+  appointmentTime DateTime
+  status          AppointmentStatus @default(PENDING)
+  reminderSent    Boolean           @default(false)
+  reminderSentAt  DateTime?
+  rejectReason    String?
+  customerNote    String?
+
+  pet     Pet             @relation(fields: [petId], references: [id])
+  service PetshopService? @relation(fields: [serviceId], references: [id], onDelete: SetNull)
+
+  @@index([petId])
+  @@index([serviceId])
+}
+
+model Customer {
+  id             String      @id @default(uuid())
+  openid         String?     @unique
+  avatarUrl      String?
+  name           String
+  phone          String
+  createdAt      DateTime    @default(now())
+  memberBalance  Int         @default(0)
+  memberJoinedAt DateTime?
+  memberLevel    MemberLevel @default(REGULAR)
+  memberPoints   Int         @default(0)
+  updatedAt      DateTime    @updatedAt
+  lastVisitAt    DateTime?
+  notes          String?
+  totalSpent     Int         @default(0)
+  pets           Pet[]
+}
+
+model FinanceRecord {
+  id          String      @id @default(uuid())
+  type        FinanceType
+  category    String
+  amount      Int
+  description String?
+  date        DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  @@index([category])
+  @@index([date])
+  @@index([type])
+}
+
+model GroomingRecord {
+  id          String   @id @default(uuid())
+  petId       String
+  serviceType String
+  serviceDate DateTime
+  groomer     String?
+  notes       String?
+  cost        Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  pet         Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@index([serviceDate])
+}
+
+model MedicalRecord {
+  id           String   @id @default(uuid())
+  petId        String
+  recordType   String
+  recordDate   DateTime
+  veterinarian String?
+  diagnosis    String?
+  treatment    String?
+  medication   String?
+  notes        String?
+  cost         Int      @default(0)
+  createdAt    DateTime @default(now())
+  updatedAt    DateTime @updatedAt
+  pet          Pet      @relation(fields: [petId], references: [id], onDelete: Cascade)
+
+  @@index([petId])
+  @@index([recordDate])
+}
+
+model Pet {
+  id              String           @id @default(uuid())
+  imageUrl        String?
+  age             Int
+  breed           String
+  ownerId         String
+  name            String
+  birthday        DateTime?
+  isNeutered      Boolean          @default(false)
+  lastGroomingAt  DateTime?
+  petType         PetType          @default(OTHER)
+  gender          PetGender        @default(UNKNOWN)
+  vaccineInfo     String?
+  allergyHistory  String?
+  healthNotes     String?
+  Appointment     Appointment[]
+  owner           Customer         @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  GroomingRecords GroomingRecord[]
+  MedicalRecords  MedicalRecord[]
+
+  @@index([ownerId])
+}
+
+model PetshopService {
+  id          String          @id @default(uuid())
+  imageUrl    String?
+  title       String
+  description String
+  value       Int
+  duration    Int?
+  category    ServiceCategory @default(GROOMING)
+  createdAt   DateTime        @default(now())
+  status      ServiceStatus   @default(ACTIVE)
+  updatedAt   DateTime        @updatedAt
+  Appointment Appointment[]
+
+  @@index([category])
+  @@index([status])
+}
+
+model PointsRecord {
+  id         String       @id @default(uuid())
+  customerId String
+  action     PointsAction
+  points     Int
+  balance    Int
+  reason     String       @default("")
+  operator   String?
+  createdAt  DateTime     @default(now())
+
+  @@index([createdAt])
+  @@index([customerId])
+}
+
+model PointsRule {
+  id          String   @id @default(uuid())
+  name        String
+  description String?
+  spendAmount Int
+  earnPoints  Int
+  isActive    Boolean  @default(true)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model Product {
+  id           String             @id
+  name         String
+  category     ProductCategory
+  price        Int
+  cost         Int
+  stock        Int
+  minStock     Int
+  unit         String
+  description  String?
+  imageUrl     String?
+  supplierId   String?
+  createdAt    DateTime           @default(now())
+  updatedAt    DateTime           @updatedAt
+  status       ProductStatus      @default(ACTIVE)
+  OrderItems   ProductOrderItem[]
+  StockRecords StockRecord[]
+
+  @@index([category])
+  @@index([name])
+  @@index([status])
+}
+
+model ProductOrder {
+  id          String             @id @default(uuid())
+  customerId  String?
+  totalAmount Int
+  status      ProductOrderStatus @default(PENDING)
+  note        String?
+  createdAt   DateTime           @default(now())
+  updatedAt   DateTime           @updatedAt
+  items       ProductOrderItem[]
+
+  @@index([createdAt])
+  @@index([customerId])
+  @@index([status])
+}
+
+model ProductOrderItem {
+  id        String       @id @default(uuid())
+  orderId   String
+  productId String
+  quantity  Int
+  price     Int
+  subtotal  Int
+  createdAt DateTime     @default(now())
+  order     ProductOrder @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product   Product      @relation(fields: [productId], references: [id])
+
+  @@index([orderId])
+  @@index([productId])
+}
+
+model RechargeRecord {
+  id         String   @id @default(uuid())
+  customerId String
+  amount     Int
+  balance    Int
+  operator   String   @default("")
+  note       String?
+  createdAt  DateTime @default(now())
+
+  @@index([createdAt])
+  @@index([customerId])
+}
+
+model SmsConfig {
+  id              String      @id @default(uuid())
+  enabled         Boolean     @default(false)
+  provider        SmsProvider @default(ALIYUN)
+  accessKeyId     String
+  accessKeySecret String // Encrypted with AES-256
+  signName        String
+
+  // Template IDs
+  appointmentConfirmTemplateId  String?
+  appointmentRemindTemplateId   String?
+  appointmentCompleteTemplateId String?
+  orderConfirmTemplateId        String?
+  balanceChangeTemplateId       String?
+  birthdayGreetingTemplateId    String?
+
+  // Auto-send enablement
+  appointmentConfirmEnabled  Boolean @default(false)
+  appointmentRemindEnabled   Boolean @default(false)
+  appointmentCompleteEnabled Boolean @default(false)
+  orderConfirmEnabled        Boolean @default(false)
+  balanceChangeEnabled       Boolean @default(false)
+  birthdayGreetingEnabled    Boolean @default(false)
+
+  // Reminder configuration
+  appointmentRemindHours Int @default(2)
+
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model SmsRecord {
+  id              String      @id @default(uuid())
+  phoneNumber     String // Masked in logs: 138****5678
+  scenario        SmsScenario
+  templateId      String
+  templateContent String?     @db.Text
+  status          SmsStatus
+  messageId       String? // Provider's message ID
+  errorCode       String?
+  errorMessage    String?
+  sentAt          DateTime    @default(now())
+
+  // Optional associations
+  customerId    String?
+  appointmentId String?
+  orderId       String?
+  petId         String?
+
+  @@index([phoneNumber])
+  @@index([scenario])
+  @@index([status])
+  @@index([sentAt])
+  @@index([customerId])
+}
+
+model StockRecord {
+  id        String      @id @default(uuid())
+  productId String
+  quantity  Int
+  cost      Int         @default(0)
+  totalCost Int         @default(0)
+  supplier  String?
+  operator  String      @default("")
+  note      String?
+  createdAt DateTime    @default(now())
+  type      StockInType @default(PURCHASE)
+  product   Product     @relation(fields: [productId], references: [id])
+
+  @@index([createdAt])
+  @@index([productId])
+  @@index([type])
+}
+
+model User {
+  id           String  @id @default(uuid())
+  name         String
+  password     String
+  email        String  @unique
+  refreshToken String?
+}
+
+enum AppointmentStatus {
+  PENDING
+  CONFIRMED
+  REJECTED
+  CANCELED
+  DONE
+  PENDING_PAYMENT
+  COMPLETED
+}
+
+enum FinanceType {
+  INCOME
+  EXPENSE
+}
+
+enum MemberLevel {
+  REGULAR
+  VIP
+}
+
+enum PetGender {
+  MALE
+  FEMALE
+  UNKNOWN
+}
+
+enum PetType {
+  CAT
+  DOG
+  OTHER
+}
+
+enum PointsAction {
+  ADD
+  DEDUCT
+  CONSUME
+  EXPIRE
+}
+
+enum ProductCategory {
+  FOOD
+  SUPPLIES
+  MEDICINE
+  TOY
+  OTHER
+  PET
+}
+
+enum ProductOrderStatus {
+  PENDING
+  CONFIRMED
+  COMPLETED
+  CANCELED
+}
+
+enum ProductStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum ServiceCategory {
+  GROOMING
+  MEDICAL
+  BOARDING
+}
+
+enum ServiceStatus {
+  ACTIVE
+  INACTIVE
+}
+
+enum SmsProvider {
+  ALIYUN
+  TENCENT
+  HUAWEI
+}
+
+enum SmsScenario {
+  APPOINTMENT_CONFIRM
+  APPOINTMENT_REMIND
+  APPOINTMENT_COMPLETE
+  ORDER_CONFIRM
+  BALANCE_CHANGE
+  BIRTHDAY_GREETING
+  TEST
+}
+
+enum SmsStatus {
+  SUCCESS
+  FAILED
+}
+
+enum StockInType {
+  PURCHASE
+  ADJUSTMENT
+}

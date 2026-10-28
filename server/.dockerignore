@@ -1,0 +1,10 @@
+node_modules
+dist
+coverage
+uploads
+.env
+.git
+.gitignore
+npm-debug.log*
+*.spec.ts
+test

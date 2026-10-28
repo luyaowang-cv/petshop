@@ -1,0 +1,70 @@
+.booking {
+  padding-top: 20px;
+  padding-bottom: 160px;
+}
+
+.booking__service {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.booking__service-title {
+  font-size: 34px;
+  font-weight: bold;
+}
+
+.booking__service-price {
+  font-size: 30px;
+  color: #ff5a00;
+}
+
+.booking__add-pet {
+  margin-top: 20px;
+  text-align: center;
+  color: #07c160;
+  font-size: 28px;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.form-row:last-child {
+  border-bottom: none;
+}
+
+.form-row--column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-row__label {
+  font-size: 28px;
+  color: #333;
+  flex-shrink: 0;
+  margin-right: 24px;
+}
+
+.form-row__picker {
+  font-size: 28px;
+  color: #333;
+}
+
+.form-row__textarea {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 28px;
+  min-height: 100px;
+}
+
+.booking__submit {
+  position: fixed;
+  left: 30px;
+  right: 30px;
+  bottom: 40px;
+}

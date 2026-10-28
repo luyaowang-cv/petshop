@@ -1,0 +1,52 @@
+GNU AFFERO GENERAL PUBLIC LICENSE
+Version 3, 19 November 2007
+
+Copyright (C) 2026 爱尚宠物管理系统
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU Affero General Public License as published
+by the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
+GNU Affero General Public License for more details.
+
+You should have received a copy of the GNU Affero General Public License
+along with this program. If not, see <https://www.gnu.org/licenses/>.
+
+---
+
+## 商业授权
+
+如果您希望在不开源的情况下使用本项目进行商业活动，请联系作者获取商业许可证。
+
+联系方式：
+- GitHub: https://github.com/luyaowang-cv
+- Email: [你的邮箱]
+
+---
+
+## 特别说明
+
+本项目采用 AGPL-3.0 许可证，这意味着：
+
+✅ 允许：
+- 学习和研究
+- 个人使用
+- 修改和分发
+- 商业使用（但必须开源）
+
+⚠️ 要求：
+- 如果您修改了代码并提供网络服务，必须公开您的源代码
+- 必须保留原作者的版权声明
+- 必须使用相同的 AGPL-3.0 许可证
+
+❌ 禁止：
+- 闭源商业使用
+- 移除版权声明
+- 使用作者名字做推广
+
+如有疑问，请参考完整的 AGPL-3.0 许可证文本：
+https://www.gnu.org/licenses/agpl-3.0.html

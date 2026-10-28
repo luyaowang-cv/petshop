@@ -1,0 +1,40 @@
+.home {
+  padding-top: 20px;
+}
+
+.service-card {
+  display: flex;
+  align-items: center;
+}
+
+.service-card__img {
+  width: 140px;
+  height: 140px;
+  border-radius: 12px;
+  margin-right: 24px;
+  flex-shrink: 0;
+  background: #eee;
+}
+
+.service-card__info {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+}
+
+.service-card__title {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.service-card__desc {
+  margin-top: 8px;
+  font-size: 26px;
+  color: #999;
+}
+
+.service-card__price {
+  margin-top: 12px;
+  font-size: 30px;
+  color: #ff5a00;
+}

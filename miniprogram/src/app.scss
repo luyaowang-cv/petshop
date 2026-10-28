@@ -1,0 +1,45 @@
+page {
+  background-color: #f6f7f9;
+  color: #333;
+  font-size: 28px;
+}
+
+/* 通用卡片 */
+.card {
+  background: #fff;
+  border-radius: 16px;
+  margin: 20px;
+  padding: 24px;
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
+}
+
+.btn-primary {
+  background: #07c160;
+  color: #fff;
+  border-radius: 12px;
+  text-align: center;
+  font-size: 32px;
+  padding: 20px 0;
+}
+
+.btn-primary.btn-disabled {
+  background: #a8e6c1;
+}
+
+.row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.muted {
+  color: #999;
+  font-size: 24px;
+}
+
+.empty {
+  text-align: center;
+  color: #bbb;
+  padding: 120px 0;
+  font-size: 28px;
+}

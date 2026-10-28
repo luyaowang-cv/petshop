@@ -1,0 +1,79 @@
+.me {
+  padding-top: 20px;
+}
+
+.me__header {
+  display: flex;
+  align-items: center;
+}
+
+.me__avatar {
+  width: 120px;
+  height: 120px;
+  border-radius: 50%;
+  margin-right: 24px;
+  flex-shrink: 0;
+}
+
+.me__avatar--placeholder {
+  background: #07c160;
+  color: #fff;
+  font-size: 48px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.me__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.me__name {
+  font-size: 36px;
+  font-weight: bold;
+}
+
+.me__level {
+  margin-top: 12px;
+  font-size: 26px;
+  color: #e6a23c;
+}
+
+.me__stats {
+  display: flex;
+  align-items: center;
+  justify-content: space-around;
+}
+
+.me__stat {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.me__stat-value {
+  font-size: 40px;
+  font-weight: bold;
+  color: #07c160;
+}
+
+.me__stat-label {
+  margin-top: 8px;
+  font-size: 26px;
+  color: #999;
+}
+
+.me__divider {
+  width: 1px;
+  height: 60px;
+  background: #eee;
+}
+
+.me__menu {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  font-size: 30px;
+}

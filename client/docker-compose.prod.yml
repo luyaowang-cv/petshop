@@ -1,0 +1,30 @@
+# 工作台部署：复用 job-assistant 的 Caddy（反代/HTTPS）和默认网络。
+# 用法（在服务器 ~/petshop/client 目录）：
+#   docker compose -f docker-compose.prod.yml up -d --build
+
+services:
+  workbench:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: petshop-workbench:latest
+    container_name: petshop-workbench
+    restart: unless-stopped
+
+    # 2G 机器和 backend/db/web/caddy 共用，设死上限
+    mem_limit: 512m
+    environment:
+      NODE_ENV: production
+      NODE_OPTIONS: --max-old-space-size=384
+
+    # 不映射宿主机端口：HTTPS 由 job-assistant 的 Caddy 反代
+    expose:
+      - "3000"
+
+    networks:
+      - job-assistant_default
+
+networks:
+  # 复用 job-assistant 项目默认网络，这样 Caddy 能反代到 petshop-workbench:3000
+  job-assistant_default:
+    external: true

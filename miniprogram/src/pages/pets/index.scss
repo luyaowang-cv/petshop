@@ -1,0 +1,50 @@
+.pets {
+  padding-top: 20px;
+  padding-bottom: 160px;
+}
+
+.pet-card {
+  display: flex;
+  align-items: center;
+}
+
+.pet-card__img {
+  width: 120px;
+  height: 120px;
+  border-radius: 12px;
+  margin-right: 24px;
+  flex-shrink: 0;
+  background: #eee;
+}
+
+.pet-card__img--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: #07c160;
+  color: #fff;
+  font-size: 48px;
+}
+
+.pet-card__info {
+  display: flex;
+  flex-direction: column;
+}
+
+.pet-card__name {
+  font-size: 34px;
+  font-weight: bold;
+}
+
+.pet-card__meta {
+  margin-top: 10px;
+  font-size: 26px;
+  color: #999;
+}
+
+.pets__add {
+  position: fixed;
+  left: 30px;
+  right: 30px;
+  bottom: 40px;
+}

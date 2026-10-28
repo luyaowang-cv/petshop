@@ -1,0 +1,78 @@
+.pet-edit {
+  padding-top: 20px;
+  padding-bottom: 160px;
+}
+
+.pet-edit__photo {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  margin-bottom: 20px;
+}
+
+.pet-edit__img {
+  width: 200px;
+  height: 200px;
+  border-radius: 16px;
+  margin-bottom: 16px;
+  background: #eee;
+}
+
+.pet-edit__img--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  color: #ccc;
+  border: 1px dashed #ccc;
+  background: #fff;
+}
+
+.form-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 20px 0;
+  border-bottom: 1px solid #f2f2f2;
+}
+
+.form-row:last-child {
+  border-bottom: none;
+}
+
+.form-row--column {
+  flex-direction: column;
+  align-items: flex-start;
+}
+
+.form-row__label {
+  font-size: 28px;
+  color: #333;
+  flex-shrink: 0;
+  margin-right: 24px;
+}
+
+.form-row__input {
+  flex: 1;
+  text-align: right;
+  font-size: 28px;
+}
+
+.form-row__picker {
+  font-size: 28px;
+  color: #333;
+}
+
+.form-row__textarea {
+  width: 100%;
+  margin-top: 12px;
+  font-size: 28px;
+  min-height: 100px;
+}
+
+.pet-edit__save {
+  position: fixed;
+  left: 30px;
+  right: 30px;
+  bottom: 40px;
+}

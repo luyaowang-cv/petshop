@@ -1,0 +1,74 @@
+.appointments {
+  padding-top: 20px;
+}
+
+.appt {
+  display: flex;
+  flex-direction: column;
+}
+
+.appt__service {
+  font-size: 32px;
+  font-weight: bold;
+}
+
+.appt__status {
+  font-size: 26px;
+  padding: 4px 16px;
+  border-radius: 20px;
+}
+
+.appt__status--pending {
+  color: #e6a23c;
+  background: #fdf6ec;
+}
+
+.appt__status--confirmed {
+  color: #67c23a;
+  background: #f0f9eb;
+}
+
+.appt__status--rejected {
+  color: #f56c6c;
+  background: #fef0f0;
+}
+
+.appt__status--canceled,
+.appt__status--done {
+  color: #999;
+  background: #f4f4f5;
+}
+
+.appt__status--completed {
+  color: #409eff;
+  background: #ecf5ff;
+}
+
+.appt__status--pending_payment {
+  color: #e6a23c;
+  background: #fdf6ec;
+}
+
+.appt__pet,
+.appt__time,
+.appt__note {
+  margin-top: 12px;
+  font-size: 26px;
+  color: #666;
+}
+
+.appt__reject {
+  margin-top: 12px;
+  font-size: 26px;
+  color: #f56c6c;
+}
+
+.appt__cancel {
+  margin-top: 20px;
+  align-self: flex-end;
+  font-size: 26px;
+  color: #f56c6c;
+  border: 1px solid #f56c6c;
+  border-radius: 8px;
+  padding: 8px 24px;
+}
