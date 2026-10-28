@@ -4,6 +4,11 @@ on:
   push:
     branches:
       - main
+    # 文档/小程序改动不影响两个镜像，跳过构建
+    paths-ignore:
+      - 'docs/**'
+      - 'miniprogram/**'
+      - '**/*.md'
   # 手动重建一次镜像
   workflow_dispatch:
 
