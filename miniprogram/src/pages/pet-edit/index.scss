@@ -1,5 +1,4 @@
 .pet-edit {
-  padding-top: 20px;
   padding-bottom: 160px;
 }
 
@@ -13,9 +12,9 @@
 .pet-edit__img {
   width: 200px;
   height: 200px;
-  border-radius: 16px;
+  border-radius: 20px;
   margin-bottom: 16px;
-  background: #eee;
+  background: #f2f3f5;
 }
 
 .pet-edit__img--placeholder {
@@ -23,17 +22,16 @@
   align-items: center;
   justify-content: center;
   font-size: 72px;
-  color: #ccc;
-  border: 1px dashed #ccc;
-  background: #fff;
+  border: 1px dashed var(--c-border);
+  background: var(--c-primary-soft);
 }
 
 .form-row {
   display: flex;
   align-items: center;
   justify-content: space-between;
-  padding: 20px 0;
-  border-bottom: 1px solid #f2f2f2;
+  padding: 22px 0;
+  border-bottom: 1px solid var(--c-border);
 }
 
 .form-row:last-child {
@@ -47,7 +45,7 @@
 
 .form-row__label {
   font-size: 28px;
-  color: #333;
+  color: var(--c-text);
   flex-shrink: 0;
   margin-right: 24px;
 }
@@ -60,7 +58,7 @@
 
 .form-row__picker {
   font-size: 28px;
-  color: #333;
+  color: var(--c-text-2);
 }
 
 .form-row__textarea {

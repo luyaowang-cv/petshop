@@ -1,74 +1,69 @@
 .appointments {
-  padding-top: 20px;
+  padding-bottom: 40px;
 }
 
-.appt {
+.appt__head {
   display: flex;
-  flex-direction: column;
+  align-items: center;
+  justify-content: space-between;
 }
 
 .appt__service {
   font-size: 32px;
-  font-weight: bold;
+  font-weight: 600;
+  flex: 1;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  margin-right: 16px;
 }
 
-.appt__status {
+.appt__row {
+  display: flex;
+  align-items: flex-start;
+  margin-top: 16px;
+}
+
+.appt__k {
+  width: 88px;
+  flex-shrink: 0;
   font-size: 26px;
-  padding: 4px 16px;
-  border-radius: 20px;
+  color: var(--c-text-3);
 }
 
-.appt__status--pending {
-  color: #e6a23c;
-  background: #fdf6ec;
-}
-
-.appt__status--confirmed {
-  color: #67c23a;
-  background: #f0f9eb;
-}
-
-.appt__status--rejected {
-  color: #f56c6c;
-  background: #fef0f0;
-}
-
-.appt__status--canceled,
-.appt__status--done {
-  color: #999;
-  background: #f4f4f5;
-}
-
-.appt__status--completed {
-  color: #409eff;
-  background: #ecf5ff;
-}
-
-.appt__status--pending_payment {
-  color: #e6a23c;
-  background: #fdf6ec;
-}
-
-.appt__pet,
-.appt__time,
-.appt__note {
-  margin-top: 12px;
+.appt__v {
+  flex: 1;
   font-size: 26px;
-  color: #666;
+  color: var(--c-text-2);
+  word-break: break-all;
 }
 
-.appt__reject {
-  margin-top: 12px;
-  font-size: 26px;
-  color: #f56c6c;
+.appt__v--danger {
+  color: var(--c-danger);
 }
 
-.appt__cancel {
-  margin-top: 20px;
-  align-self: flex-end;
+.appt__actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 24px;
+  padding-top: 24px;
+  border-top: 1px solid var(--c-border);
+}
+
+.appt__btn {
+  padding: 14px 40px;
+  border-radius: 999px;
   font-size: 26px;
-  color: #f56c6c;
-  border: 1px solid #f56c6c;
-  border-radius: 8px;
-  padding: 8px 24px;
+}
+
+.appt__btn--ghost {
+  color: var(--c-text-2);
+  background: #f3f4f6;
+}
+
+.appt__btn--primary {
+  color: #fff;
+  background: var(--c-primary);
+  margin-left: 20px;
 }

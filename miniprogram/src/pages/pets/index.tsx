@@ -1,8 +1,10 @@
 import { useState } from 'react'
-import Taro, { useDidShow } from '@tarojs/taro'
+import Taro, { useDidShow, usePullDownRefresh } from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { listPets } from '../../services/api'
 import { assetUrl, PET_GENDER_LABEL, PET_TYPE_LABEL } from '../../constants/config'
+import { Empty } from '../../components/Empty'
+import { Skeleton } from '../../components/Skeleton'
 import type { Pet } from '../../types'
 import './index.scss'
 
@@ -12,6 +14,11 @@ export default function Pets() {
 
   useDidShow(() => {
     fetchPets()
+  })
+
+  usePullDownRefresh(async () => {
+    await fetchPets()
+    Taro.stopPullDownRefresh()
   })
 
   const fetchPets = async () => {
@@ -36,9 +43,15 @@ export default function Pets() {
   return (
     <View className='pets'>
       {loading ? (
-        <View className='empty'>加载中…</View>
+        <Skeleton count={3} variant='avatar' />
       ) : pets.length === 0 ? (
-        <View className='empty'>还没有宠物，点下方按钮添加</View>
+        <Empty
+          icon='🐶'
+          title='还没有宠物档案'
+          desc='添加宠物后，预约时就能直接选择它啦'
+          actionText='添加宠物'
+          onAction={goCreate}
+        />
       ) : (
         pets.map((pet) => (
           <View
@@ -54,7 +67,7 @@ export default function Pets() {
               />
             ) : (
               <View className='pet-card__img pet-card__img--placeholder'>
-                宠
+                🐾
               </View>
             )}
             <View className='pet-card__info'>
@@ -64,12 +77,16 @@ export default function Pets() {
                 {PET_GENDER_LABEL[pet.gender] ?? pet.gender}
               </Text>
             </View>
+            <Text className='pet-card__chevron'>›</Text>
           </View>
         ))
       )}
-      <View className='pets__add btn-primary' onClick={goCreate}>
-        新增宠物
-      </View>
+
+      {pets.length > 0 ? (
+        <View className='pets__add btn-primary' onClick={goCreate}>
+          新增宠物
+        </View>
+      ) : null}
     </View>
   )
 }

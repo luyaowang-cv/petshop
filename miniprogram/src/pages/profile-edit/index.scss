@@ -1,0 +1,73 @@
+.profile-edit {
+  padding-top: 40px;
+  padding-bottom: 180px;
+}
+
+.profile-edit__avatar-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 20px 0 40px;
+}
+
+.profile-edit__avatar-btn {
+  width: 180px;
+  height: 180px;
+  padding: 0;
+  border-radius: 50%;
+  background: transparent;
+  border: none;
+  overflow: hidden;
+  line-height: 1;
+}
+
+.profile-edit__avatar-btn::after {
+  border: none;
+}
+
+.profile-edit__avatar {
+  width: 180px;
+  height: 180px;
+  border-radius: 50%;
+  background: #fff;
+}
+
+.profile-edit__avatar--placeholder {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 72px;
+  background: var(--c-primary-soft);
+}
+
+.profile-edit__hint {
+  margin-top: 20px;
+  font-size: 24px;
+  color: var(--c-text-3);
+}
+
+.profile-edit__row {
+  display: flex;
+  align-items: center;
+}
+
+.profile-edit__label {
+  width: 120px;
+  flex-shrink: 0;
+  font-size: 30px;
+  color: var(--c-text);
+}
+
+.profile-edit__input {
+  flex: 1;
+  font-size: 30px;
+  text-align: right;
+  color: var(--c-text);
+}
+
+.profile-edit__submit {
+  position: fixed;
+  left: 30px;
+  right: 30px;
+  bottom: 40px;
+}

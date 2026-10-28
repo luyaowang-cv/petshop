@@ -4,6 +4,8 @@ import { View, Text, Image } from '@tarojs/components'
 import { deletePet, listPets } from '../../services/api'
 import { assetUrl, PET_GENDER_LABEL, PET_TYPE_LABEL } from '../../constants/config'
 import { formatDateTime } from '../../utils/format'
+import { Empty } from '../../components/Empty'
+import { Skeleton } from '../../components/Skeleton'
 import type { Pet } from '../../types'
 import './index.scss'
 
@@ -59,11 +61,11 @@ export default function PetDetail() {
   }
 
   if (loading) {
-    return <View className='empty'>加载中…</View>
+    return <Skeleton count={2} variant='avatar' />
   }
 
   if (!pet) {
-    return <View className='empty'>宠物不存在</View>
+    return <Empty icon='🐾' title='宠物不存在' desc='它可能已经被删除了' />
   }
 
   return (
@@ -77,7 +79,7 @@ export default function PetDetail() {
           />
         ) : (
           <View className='pet-detail__img pet-detail__img--placeholder'>
-            宠
+            🐾
           </View>
         )}
         <View className='pet-detail__info'>

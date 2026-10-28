@@ -3,6 +3,15 @@
 // 真机/部署（阶段 A）：https://pet-api.offerscoming.cn
 export const API_BASE_URL = 'https://pet-api.offerscoming.cn'
 
+// 门店信息（暂无后端接口，先由前端维护；后台「门店信息」页接入接口后可改为读取）
+export const STORE_INFO = {
+  name: '爱尚宠物店',
+  phone: '13888888888',
+  phoneDisplay: '138-8888-8888',
+  address: '河北省邯郸市魏县',
+  businessHours: '周一至周日 09:00-21:00',
+}
+
 // 将后端返回的图片路径（相对路径 /uploads/x 或完整 URL）转换为可访问的完整地址
 export function assetUrl(path: string | null | undefined): string {
   if (!path) return ''
@@ -31,6 +40,18 @@ export const APPOINTMENT_STATUS_LABEL: Record<string, string> = {
   COMPLETED: '已完成',
   DONE: '已完成',
   PENDING_PAYMENT: '待支付',
+}
+
+export const SERVICE_CATEGORY_LABEL: Record<string, string> = {
+  GROOMING: '洗护',
+  MEDICAL: '医疗',
+  BOARDING: '寄养',
+}
+
+export const SERVICE_CATEGORY_EMOJI: Record<string, string> = {
+  GROOMING: '🛁',
+  MEDICAL: '💊',
+  BOARDING: '🏠',
 }
 
 export const MEMBER_LEVEL_LABEL: Record<string, string> = {

@@ -24,6 +24,8 @@ export default defineConfig<'webpack5'>(async (merge, { command: _command, mode:
     },
     copy: {
       patterns: [
+        // tabBar 图标等静态资源需原样复制到产物目录
+        { from: 'src/assets/', to: 'dist/assets/' }
       ],
       options: {
       }

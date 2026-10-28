@@ -1,29 +1,38 @@
+/* ============ 设计 token ============ */
+/* 只放颜色变量（无单位），避免 pxtransform 对变量内数值的处理差异。
+   想换主色，改 --c-primary / --c-primary-dark / --c-primary-soft 三处即可。 */
 page {
-  background-color: #f6f7f9;
-  color: #333;
+  --c-primary: #ff7a45;
+  --c-primary-dark: #e85a28;
+  --c-primary-soft: #fff1ea;
+  --c-text: #2b2f36;
+  --c-text-2: #6b7280;
+  --c-text-3: #9b9fa6;
+  --c-border: #eef0f3;
+  --c-bg: #f6f7f9;
+  --c-card: #ffffff;
+  --c-danger: #f5455c;
+  --c-danger-soft: #fff1f3;
+  --c-success: #2fb86b;
+  --c-success-soft: #eefaf3;
+  --c-warning: #f5a623;
+  --c-warning-soft: #fff8e8;
+
+  background-color: var(--c-bg);
+  color: var(--c-text);
   font-size: 28px;
+  line-height: 1.5;
+  font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Helvetica Neue',
+    sans-serif;
 }
 
-/* 通用卡片 */
+/* ============ 通用布局 ============ */
 .card {
-  background: #fff;
-  border-radius: 16px;
+  background: var(--c-card);
+  border-radius: 20px;
   margin: 20px;
-  padding: 24px;
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.04);
-}
-
-.btn-primary {
-  background: #07c160;
-  color: #fff;
-  border-radius: 12px;
-  text-align: center;
-  font-size: 32px;
-  padding: 20px 0;
-}
-
-.btn-primary.btn-disabled {
-  background: #a8e6c1;
+  padding: 28px;
+  box-shadow: 0 4px 20px rgba(43, 47, 54, 0.05);
 }
 
 .row {
@@ -33,13 +42,89 @@ page {
 }
 
 .muted {
-  color: #999;
+  color: var(--c-text-3);
   font-size: 24px;
 }
 
-.empty {
+.section {
+  margin-top: 8px;
+}
+
+.section__head {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  padding: 24px 30px 4px;
+}
+
+.section__title {
+  font-size: 32px;
+  font-weight: bold;
+  color: var(--c-text);
+}
+
+.section__extra {
+  font-size: 24px;
+  color: var(--c-text-3);
+}
+
+/* ============ 按钮 ============ */
+.btn-primary {
+  background: var(--c-primary);
+  color: #fff;
+  border-radius: 16px;
   text-align: center;
-  color: #bbb;
-  padding: 120px 0;
-  font-size: 28px;
+  font-size: 32px;
+  font-weight: 500;
+  padding: 24px 0;
+}
+
+.btn-primary.is-disabled,
+.btn-primary.btn-disabled {
+  background: #ffc7ae;
+}
+
+.btn-ghost {
+  background: var(--c-primary-soft);
+  color: var(--c-primary);
+  border-radius: 16px;
+  text-align: center;
+  font-size: 30px;
+  padding: 22px 0;
+}
+
+/* ============ 状态标签 ============ */
+.pill {
+  font-size: 24px;
+  line-height: 1;
+  padding: 8px 16px;
+  border-radius: 999px;
+  white-space: nowrap;
+}
+
+.pill--pending,
+.pill--pending_payment {
+  color: var(--c-warning);
+  background: var(--c-warning-soft);
+}
+
+.pill--confirmed {
+  color: var(--c-primary);
+  background: var(--c-primary-soft);
+}
+
+.pill--completed,
+.pill--done {
+  color: var(--c-success);
+  background: var(--c-success-soft);
+}
+
+.pill--rejected {
+  color: var(--c-danger);
+  background: var(--c-danger-soft);
+}
+
+.pill--canceled {
+  color: var(--c-text-3);
+  background: #f3f4f6;
 }

@@ -1,3 +1,8 @@
 export default definePageConfig({
-  navigationBarTitleText: '吉宠宠物',
+  navigationBarTitleText: '爱尚宠物',
+  navigationBarBackgroundColor: '#FF7A45',
+  navigationBarTextStyle: 'white',
+  enablePullDownRefresh: true,
+  backgroundColor: '#FF7A45',
+  backgroundTextStyle: 'light',
 })

@@ -7,6 +7,7 @@ import {
   listPets,
   listServices,
 } from '../../services/api'
+import { Skeleton } from '../../components/Skeleton'
 import type { Pet, PetshopService } from '../../types'
 import './index.scss'
 
@@ -138,7 +139,7 @@ export default function Booking() {
   }
 
   if (loading) {
-    return <View className='empty'>加载中…</View>
+    return <Skeleton count={2} variant='card' />
   }
 
   const submitDisabled = pets.length === 0 || !date || !time

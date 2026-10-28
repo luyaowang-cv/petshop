@@ -15,6 +15,7 @@ import {
   PET_GENDER_LABEL,
   PET_TYPE_LABEL,
 } from '../../constants/config'
+import { Skeleton } from '../../components/Skeleton'
 import type { PetGender, PetInput, PetType } from '../../types'
 import './index.scss'
 
@@ -131,7 +132,7 @@ export default function PetEdit() {
   }
 
   if (loading) {
-    return <View className='empty'>加载中…</View>
+    return <Skeleton count={2} variant='card' />
   }
 
   return (
