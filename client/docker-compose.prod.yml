@@ -7,7 +7,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: petshop-workbench:latest
+    image: ghcr.io/luyaowang-cv/petshop-workbench:latest
     container_name: petshop-workbench
     restart: unless-stopped
 

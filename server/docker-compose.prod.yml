@@ -11,7 +11,7 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
-    image: petshop-api:latest
+    image: ghcr.io/luyaowang-cv/petshop-api:latest
     container_name: petshop-backend
     restart: unless-stopped
 

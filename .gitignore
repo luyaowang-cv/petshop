@@ -68,3 +68,8 @@ docker-data/
 
 # WeChat mini-program per-developer settings
 project.private.config.json
+
+# 小程序各环境配置（本地文件，AppID 不入公开仓库）
+miniprogram/.env.development
+miniprogram/.env.production
+miniprogram/.env.test

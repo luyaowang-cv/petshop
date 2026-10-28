@@ -1,0 +1,60 @@
+name: build-and-push-petshop
+
+on:
+  push:
+    branches:
+      - main
+  # 手动重建一次镜像
+  workflow_dispatch:
+
+env:
+  REGISTRY: ghcr.io
+
+concurrency:
+  group: build-petshop
+  cancel-in-progress: false
+
+# 这个工作流只负责「构建两个镜像并推到 ghcr」。
+# 上线由服务器自己完成：/root/watch-deploy-petshop.sh 每 2 分钟检查 ghcr 上 :latest 的
+# 镜像 ID，变了就 git pull + force-recreate 对应容器（crontab 安装，见 docs/deploy.md）。
+#
+# 为什么不在 CI 里 SSH 进服务器部署：公开仓库放服务器私钥不可行（offerscoming 已踩过），
+# 服务器轮询拉取不需要任何凭据。构建也搬到 GitHub runner（内存远大于那台 2G 机器），
+# 彻底告别服务器本地 next build 的 OOM。
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+    strategy:
+      matrix:
+        include:
+          - name: api
+            context: ./server
+            suffix: api
+          - name: workbench
+            context: ./client
+            suffix: workbench
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push ${{ matrix.name }}
+        uses: docker/build-push-action@v6
+        with:
+          context: ${{ matrix.context }}
+          push: true
+          tags: ${{ env.REGISTRY }}/${{ github.repository }}-${{ matrix.suffix }}:latest
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
