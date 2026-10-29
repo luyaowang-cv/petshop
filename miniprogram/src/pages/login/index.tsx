@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Taro, { useLoad } from '@tarojs/taro'
 import { Button, View, Text, Image } from '@tarojs/components'
 import { login, updateMyProfile, uploadImage } from '../../services/api'
+import { LOGIN_COVER } from '../../constants/config'
 import { isLoggedIn, setAuth } from '../../utils/auth'
 import './index.scss'
 
@@ -61,37 +62,39 @@ export default function Login() {
 
   return (
     <View className='login'>
-      <View className='login__brand'>
-        <Text className='login__title'>爱尚宠物</Text>
-        <Text className='login__subtitle'>宠物洗护 · 预约 · 会员服务</Text>
-      </View>
-      <View className='login__body'>
-        <Button
-          className='login__avatar'
-          openType='chooseAvatar'
-          onChooseAvatar={handleChooseAvatar}
-        >
-          {avatarTempPath ? (
-            <Image
-              className='login__avatar-img'
-              src={avatarTempPath}
-              mode='aspectFill'
-            />
-          ) : (
-            <Text className='login__avatar-plus'>＋</Text>
-          )}
-        </Button>
-        <Text className='login__avatar-tip'>点击授权微信头像</Text>
+      <Image className='login__cover' src={LOGIN_COVER} mode='aspectFill' />
 
-        <Button
-          className='login__btn'
-          openType='getPhoneNumber'
-          onGetPhoneNumber={handleGetPhoneNumber}
-          loading={loading}
-        >
-          微信手机号一键登录
-        </Button>
-        <Text className='login__tip'>登录即代表同意授权手机号用于预约与会员服务</Text>
+      <View className='login__content'>
+        <View className='login__panel'>
+          <Button
+            className='login__avatar'
+            openType='chooseAvatar'
+            onChooseAvatar={handleChooseAvatar}
+          >
+            {avatarTempPath ? (
+              <Image
+                className='login__avatar-img'
+                src={avatarTempPath}
+                mode='aspectFill'
+              />
+            ) : (
+              <Text className='login__avatar-plus'>＋</Text>
+            )}
+          </Button>
+          <Text className='login__avatar-tip'>点击授权微信头像</Text>
+
+          <Button
+            className='login__btn'
+            openType='getPhoneNumber'
+            onGetPhoneNumber={handleGetPhoneNumber}
+            loading={loading}
+          >
+            微信手机号一键登录
+          </Button>
+          <Text className='login__tip'>
+            登录即代表同意授权手机号用于预约与会员服务
+          </Text>
+        </View>
       </View>
     </View>
   )

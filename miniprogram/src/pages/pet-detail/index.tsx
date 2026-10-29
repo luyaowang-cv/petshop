@@ -6,6 +6,7 @@ import { assetUrl, PET_GENDER_LABEL, PET_TYPE_LABEL } from '../../constants/conf
 import { formatDateTime } from '../../utils/format'
 import { Empty } from '../../components/Empty'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { Pet } from '../../types'
 import './index.scss'
 
@@ -70,6 +71,7 @@ export default function PetDetail() {
 
   return (
     <View className='pet-detail'>
+      <PageBg />
       <View className='pet-detail__header card'>
         {pet.imageUrl ? (
           <Image

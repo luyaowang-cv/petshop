@@ -18,6 +18,7 @@ import {
   Avatar,
   Select,
   Upload,
+  Divider,
 } from "antd";
 import type { TableColumnsType, UploadProps } from "antd";
 import {
@@ -25,15 +26,14 @@ import {
   EditOutlined,
   DeleteOutlined,
   SearchOutlined,
-  ScissorOutlined,
   AppstoreOutlined,
-  MedicineBoxOutlined,
-  HomeOutlined,
+  TagsOutlined,
   CheckCircleOutlined,
   StopOutlined,
 } from "@ant-design/icons";
 import {
   PetshopService,
+  PetshopServiceBodyData,
   ServiceCategory,
   ServiceStatus,
 } from "@/@types/PetshopServices";
@@ -44,6 +44,21 @@ import {
   updatePetshopService,
   PETSHOPSERVICE_KEY,
 } from "@/services/queries/PetshopServices";
+import {
+  createServiceCategory,
+  deleteServiceCategory,
+  fetchServiceCategories,
+  updateServiceCategory,
+  SERVICECATEGORY_KEY,
+} from "@/services/queries/ServiceCategories";
+
+// 从 axios 错误里取出后端返回的中文提示
+function readApiError(error: unknown, fallback: string): string {
+  const data = (error as any)?.response?.data;
+  if (Array.isArray(data?.message)) return data.message[0] ?? fallback;
+  if (typeof data?.message === "string" && data.message) return data.message;
+  return fallback;
+}
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { uploadImage } from "@/services/queries/Upload";
 import { assetUrl } from "@/utils/assetUrl";
@@ -55,9 +70,7 @@ const { Option } = Select;
 export default function Services() {
   const queryClient = useQueryClient();
   const [search, setSearch] = useState("");
-  const [categoryFilter, setCategoryFilter] = useState<ServiceCategory | "ALL">(
-    "ALL",
-  );
+  const [categoryFilter, setCategoryFilter] = useState<string>("ALL");
   const [modalVisible, setModalVisible] = useState(false);
   const [modalMode, setModalMode] = useState<"create" | "edit">("create");
   const [editingService, setEditingService] = useState<PetshopService | null>(
@@ -67,17 +80,29 @@ export default function Services() {
   const [uploading, setUploading] = useState(false);
   const [form] = Form.useForm();
 
+  // 分类管理弹窗
+  const [categoryModalVisible, setCategoryModalVisible] = useState(false);
+  const [editingCategory, setEditingCategory] = useState<ServiceCategory | null>(
+    null,
+  );
+  const [categoryForm] = Form.useForm();
+
   // 查询服务列表
   const { data: servicesData, isLoading } = useQuery({
     queryKey: [PETSHOPSERVICE_KEY],
     queryFn: fetchPetshopServices,
   });
 
+  // 查询分类列表
+  const { data: categoriesData } = useQuery({
+    queryKey: [SERVICECATEGORY_KEY],
+    queryFn: fetchServiceCategories,
+  });
+  const categories = categoriesData?.categories ?? [];
+
   // 创建服务
   const createServiceMutation = useMutation({
-    mutationFn: (
-      data: Omit<PetshopService, "id" | "createdAt" | "updatedAt">,
-    ) => createPetshopService(data),
+    mutationFn: (data: PetshopServiceBodyData) => createPetshopService(data),
     onSuccess: () => {
       message.success("服务创建成功");
       queryClient.invalidateQueries({ queryKey: [PETSHOPSERVICE_KEY] });
@@ -95,7 +120,7 @@ export default function Services() {
       data,
     }: {
       id: string;
-      data: Omit<PetshopService, "id" | "createdAt" | "updatedAt">;
+      data: PetshopServiceBodyData;
     }) => updatePetshopService(id, data),
     onSuccess: () => {
       message.success("服务更新成功");
@@ -119,6 +144,93 @@ export default function Services() {
     },
   });
 
+  // ---------- 分类管理 ----------
+  const createCategoryMutation = useMutation({
+    mutationFn: (payload: { name: string; icon?: string | null }) =>
+      createServiceCategory(payload),
+    onSuccess: () => {
+      message.success("分类创建成功");
+      queryClient.invalidateQueries({ queryKey: [SERVICECATEGORY_KEY] });
+      handleCloseCategoryModal();
+    },
+    onError: (error) =>
+      message.error(readApiError(error, "分类创建失败，请重试")),
+  });
+
+  const updateCategoryMutation = useMutation({
+    mutationFn: ({
+      id,
+      name,
+      icon,
+    }: {
+      id: string;
+      name: string;
+      icon?: string | null;
+    }) => updateServiceCategory(id, { name, icon }),
+    onSuccess: () => {
+      message.success("分类更新成功");
+      queryClient.invalidateQueries({ queryKey: [SERVICECATEGORY_KEY] });
+      handleCloseCategoryModal();
+    },
+    onError: (error) =>
+      message.error(readApiError(error, "分类更新失败，请重试")),
+  });
+
+  const deleteCategoryMutation = useMutation({
+    mutationFn: (id: string) => deleteServiceCategory(id),
+    onSuccess: () => {
+      message.success("分类已删除");
+      queryClient.invalidateQueries({ queryKey: [SERVICECATEGORY_KEY] });
+    },
+    onError: (error) => message.error(readApiError(error, "删除分类失败")),
+  });
+
+  const handleOpenCategoryModal = (category?: ServiceCategory) => {
+    setEditingCategory(category ?? null);
+    categoryForm.resetFields();
+    if (category) {
+      categoryForm.setFieldsValue({ name: category.name, icon: category.icon });
+    }
+    setCategoryModalVisible(true);
+  };
+
+  const handleCloseCategoryModal = () => {
+    setCategoryModalVisible(false);
+    setEditingCategory(null);
+    categoryForm.resetFields();
+  };
+
+  const handleSubmitCategory = async () => {
+    try {
+      const values = await categoryForm.validateFields();
+      if (editingCategory) {
+        await updateCategoryMutation.mutateAsync({
+          id: editingCategory.id,
+          name: values.name,
+          icon: values.icon || null,
+        });
+      } else {
+        await createCategoryMutation.mutateAsync({
+          name: values.name,
+          icon: values.icon || null,
+        });
+      }
+    } catch (error) {
+      // 表单校验失败时不提示
+    }
+  };
+
+  const handleDeleteCategory = (category: ServiceCategory) => {
+    Modal.confirm({
+      title: "确认删除分类",
+      content: `确定要删除分类「${category.name}」吗？该分类下还有项目时无法删除。`,
+      okText: "确认",
+      cancelText: "取消",
+      okButtonProps: { danger: true },
+      onOk: () => deleteCategoryMutation.mutate(category.id),
+    });
+  };
+
   // 过滤服务数据
   const filteredServices =
     servicesData?.services?.filter((service) => {
@@ -129,7 +241,7 @@ export default function Services() {
           service.description?.toLowerCase().includes(searchLower);
         if (!matchSearch) return false;
       }
-      if (categoryFilter !== "ALL" && service.category !== categoryFilter) {
+      if (categoryFilter !== "ALL" && service.categoryId !== categoryFilter) {
         return false;
       }
       return true;
@@ -140,18 +252,33 @@ export default function Services() {
   const activeServices =
     servicesData?.services?.filter((s) => s.status === ServiceStatus.ACTIVE)
       .length || 0;
-  const groomingCount =
-    servicesData?.services?.filter(
-      (s) => s.category === ServiceCategory.GROOMING,
-    ).length || 0;
-  const medicalCount =
-    servicesData?.services?.filter(
-      (s) => s.category === ServiceCategory.MEDICAL,
-    ).length || 0;
-  const boardingCount =
-    servicesData?.services?.filter(
-      (s) => s.category === ServiceCategory.BOARDING,
-    ).length || 0;
+
+  const categoryStats = categories.map((category) => ({
+    category,
+    count:
+      servicesData?.services?.filter((s) => s.categoryId === category.id)
+        .length || 0,
+  }));
+
+  // 分类配色循环使用
+  const CATEGORY_COLORS = ["blue", "red", "green", "purple", "orange", "cyan"];
+  const CATEGORY_HEX = [
+    "#1890ff",
+    "#ff4d4f",
+    "#52c41a",
+    "#722ed1",
+    "#fa8c16",
+    "#13c2c2",
+  ];
+  const categoryIndex = (id?: string | null) =>
+    Math.max(
+      categories.findIndex((c) => c.id === id),
+      0,
+    );
+  const categoryColor = (id?: string | null) =>
+    CATEGORY_COLORS[categoryIndex(id) % CATEGORY_COLORS.length];
+  const categoryHex = (id?: string | null) =>
+    CATEGORY_HEX[categoryIndex(id) % CATEGORY_HEX.length];
 
   // 上传服务封面
   const handleUpload: UploadProps["customRequest"] = async ({
@@ -188,7 +315,7 @@ export default function Services() {
     form.setFieldsValue({
       title: service.title,
       description: service.description,
-      category: service.category,
+      categoryId: service.categoryId ?? undefined,
       price: service.value / 100, // 转换为元
       status: service.status,
     });
@@ -209,13 +336,10 @@ export default function Services() {
     try {
       const values = await form.validateFields();
 
-      const serviceData: Omit<
-        PetshopService,
-        "id" | "createdAt" | "updatedAt"
-      > = {
+      const serviceData: PetshopServiceBodyData = {
         title: values.title,
         description: values.description || "",
-        category: values.category,
+        categoryId: values.categoryId,
         value: Math.round(values.price * 100), // 转换为分
         duration: 3600, // 默认1小时（3600秒），保留字段以便后续扩展
         status: values.status,
@@ -258,8 +382,13 @@ export default function Services() {
       await updateServiceMutation.mutateAsync({
         id: service.id,
         data: {
-          ...service,
+          title: service.title,
+          description: service.description,
+          categoryId: service.categoryId ?? "",
+          value: service.value,
+          duration: service.duration ?? 3600,
           status: newStatus,
+          imageUrl: service.imageUrl,
         },
       });
       message.success(
@@ -270,28 +399,6 @@ export default function Services() {
     }
   };
 
-  // 获取分类配置
-  const getCategoryConfig = (category: ServiceCategory) => {
-    const config = {
-      [ServiceCategory.GROOMING]: {
-        text: "洗护",
-        color: "blue",
-        icon: <ScissorOutlined />,
-      },
-      [ServiceCategory.MEDICAL]: {
-        text: "医疗",
-        color: "red",
-        icon: <MedicineBoxOutlined />,
-      },
-      [ServiceCategory.BOARDING]: {
-        text: "寄养",
-        color: "green",
-        icon: <HomeOutlined />,
-      },
-    };
-    return config[category];
-  };
-
   // 表格列定义
   const columns: TableColumnsType<PetshopService> = [
     {
@@ -299,20 +406,14 @@ export default function Services() {
       key: "service",
       width: 280,
       render: (_, record) => {
-        const categoryConfig = getCategoryConfig(record.category);
         return (
           <div style={{ display: "flex", alignItems: "center", gap: "12px" }}>
             <Avatar
               size={48}
               src={record.imageUrl ? assetUrl(record.imageUrl) : undefined}
-              icon={categoryConfig.icon}
+              icon={<AppstoreOutlined />}
               style={{
-                backgroundColor:
-                  categoryConfig.color === "blue"
-                    ? "#1890ff"
-                    : categoryConfig.color === "red"
-                      ? "#ff4d4f"
-                      : "#52c41a",
+                backgroundColor: categoryHex(record.categoryId),
                 flexShrink: 0,
               }}
             />
@@ -353,10 +454,13 @@ export default function Services() {
       width: 100,
       align: "center",
       render: (_, record) => {
-        const config = getCategoryConfig(record.category);
+        if (!record.category) {
+          return <Tag style={{ fontSize: 13 }}>未分类</Tag>;
+        }
         return (
-          <Tag color={config.color} icon={config.icon} style={{ fontSize: 13 }}>
-            {config.text}
+          <Tag color={categoryColor(record.categoryId)} style={{ fontSize: 13 }}>
+            {record.category.icon ? `${record.category.icon} ` : ""}
+            {record.category.name}
           </Tag>
         );
       },
@@ -456,36 +560,18 @@ export default function Services() {
             />
           </Card>
         </Col>
-        <Col span={4}>
-          <Card>
-            <Statistic
-              title="洗护"
-              value={groomingCount}
-              prefix={<ScissorOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col span={4}>
-          <Card>
-            <Statistic
-              title="医疗"
-              value={medicalCount}
-              prefix={<MedicineBoxOutlined />}
-              valueStyle={{ color: "#ff4d4f" }}
-            />
-          </Card>
-        </Col>
-        <Col span={4}>
-          <Card>
-            <Statistic
-              title="寄养"
-              value={boardingCount}
-              prefix={<HomeOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
+        {categoryStats.slice(0, 3).map(({ category, count }, index) => (
+          <Col span={4} key={category.id}>
+            <Card>
+              <Statistic
+                title={`${category.icon ?? ""} ${category.name}`.trim()}
+                value={count}
+                prefix={<TagsOutlined />}
+                valueStyle={{ color: CATEGORY_HEX[index % CATEGORY_HEX.length] }}
+              />
+            </Card>
+          </Col>
+        ))}
       </Row>
 
       <Card
@@ -500,13 +586,21 @@ export default function Services() {
             <span style={{ fontSize: "18px", fontWeight: 600 }}>
               服务项目管理
             </span>
-            <Button
-              type="primary"
-              icon={<PlusOutlined />}
-              onClick={handleCreate}
-            >
-              添加服务
-            </Button>
+            <Space>
+              <Button
+                icon={<TagsOutlined />}
+                onClick={() => handleOpenCategoryModal()}
+              >
+                新建服务
+              </Button>
+              <Button
+                type="primary"
+                icon={<PlusOutlined />}
+                onClick={handleCreate}
+              >
+                添加项目
+              </Button>
+            </Space>
           </div>
         }
         styles={{ body: { padding: "16px" } }}
@@ -527,15 +621,12 @@ export default function Services() {
             style={{ width: 150 }}
           >
             <Option value="ALL">全部分类</Option>
-            <Option value={ServiceCategory.GROOMING}>
-              <ScissorOutlined /> 洗护
-            </Option>
-            <Option value={ServiceCategory.MEDICAL}>
-              <MedicineBoxOutlined /> 医疗
-            </Option>
-            <Option value={ServiceCategory.BOARDING}>
-              <HomeOutlined /> 寄养
-            </Option>
+            {categories.map((category) => (
+              <Option key={category.id} value={category.id}>
+                {category.icon ? `${category.icon} ` : ""}
+                {category.name}
+              </Option>
+            ))}
           </Select>
         </Space>
 
@@ -557,7 +648,7 @@ export default function Services() {
 
       {/* 服务表单弹窗 */}
       <Modal
-        title={modalMode === "create" ? "添加服务" : "编辑服务"}
+        title={modalMode === "create" ? "添加项目" : "编辑项目"}
         open={modalVisible}
         onOk={handleSubmit}
         onCancel={handleCloseModal}
@@ -580,20 +671,18 @@ export default function Services() {
           </Form.Item>
 
           <Form.Item
-            name="category"
-            label="服务分类"
-            rules={[{ required: true, message: "请选择服务分类" }]}
+            name="categoryId"
+            label="所属服务"
+            rules={[{ required: true, message: "请选择所属服务" }]}
+            extra="没有合适的分类？点表格右上角「新建服务」添加"
           >
-            <Select placeholder="请选择服务分类">
-              <Option value={ServiceCategory.GROOMING}>
-                <ScissorOutlined /> 洗护
-              </Option>
-              <Option value={ServiceCategory.MEDICAL}>
-                <MedicineBoxOutlined /> 医疗
-              </Option>
-              <Option value={ServiceCategory.BOARDING}>
-                <HomeOutlined /> 寄养
-              </Option>
+            <Select placeholder="请选择所属服务">
+              {categories.map((category) => (
+                <Option key={category.id} value={category.id}>
+                  {category.icon ? `${category.icon} ` : ""}
+                  {category.name}
+                </Option>
+              ))}
             </Select>
           </Form.Item>
 
@@ -662,6 +751,115 @@ export default function Services() {
               </Option>
             </Select>
           </Form.Item>
+        </Form>
+      </Modal>
+
+      {/* 分类管理弹窗（新建服务） */}
+      <Modal
+        title="服务分类"
+        open={categoryModalVisible}
+        onCancel={handleCloseCategoryModal}
+        footer={null}
+        width={560}
+      >
+        <div style={{ marginBottom: 8, color: "#8c8c8c", fontSize: 13 }}>
+          分类是「洗护 / 美容 / 医疗」这样的大类，先建分类，再往里添加具体项目。
+        </div>
+
+        {categories.map((category) => {
+          const count =
+            servicesData?.services?.filter((s) => s.categoryId === category.id)
+              .length ?? 0;
+          return (
+            <div
+              key={category.id}
+              style={{
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "space-between",
+                padding: "10px 12px",
+                marginBottom: 8,
+                border: "1px solid #f0f0f0",
+                borderRadius: 8,
+                background: editingCategory?.id === category.id ? "#f0f5ff" : "#fff",
+              }}
+            >
+              <Space>
+                <span style={{ fontSize: 18, width: 24, textAlign: "center" }}>
+                  {category.icon || "🐾"}
+                </span>
+                <span style={{ fontWeight: 500 }}>{category.name}</span>
+                <span style={{ color: "#999", fontSize: 12 }}>
+                  {count} 个项目
+                </span>
+              </Space>
+              <Space size="small">
+                <Button
+                  type="link"
+                  size="small"
+                  icon={<EditOutlined />}
+                  onClick={() => {
+                    setEditingCategory(category);
+                    categoryForm.setFieldsValue({
+                      name: category.name,
+                      icon: category.icon,
+                    });
+                  }}
+                >
+                  编辑
+                </Button>
+                <Button
+                  type="link"
+                  danger
+                  size="small"
+                  icon={<DeleteOutlined />}
+                  onClick={() => handleDeleteCategory(category)}
+                >
+                  删除
+                </Button>
+              </Space>
+            </div>
+          );
+        })}
+
+        <Divider style={{ margin: "16px 0 12px" }} />
+
+        <Form form={categoryForm} layout="vertical">
+          <Form.Item
+            name="name"
+            label={editingCategory ? `编辑「${editingCategory.name}」` : "新建服务"}
+            rules={[
+              { required: true, message: "请输入分类名称" },
+              { max: 20, message: "最多 20 个字符" },
+            ]}
+          >
+            <Input placeholder="如：美容、训练、上门服务" />
+          </Form.Item>
+          <Form.Item name="icon" label="图标（可选，填一个 emoji）">
+            <Input placeholder="如：✨" maxLength={4} />
+          </Form.Item>
+          <Space>
+            <Button
+              type="primary"
+              onClick={handleSubmitCategory}
+              loading={
+                createCategoryMutation.isLoading ||
+                updateCategoryMutation.isLoading
+              }
+            >
+              {editingCategory ? "保存修改" : "创建"}
+            </Button>
+            {editingCategory ? (
+              <Button
+                onClick={() => {
+                  setEditingCategory(null);
+                  categoryForm.resetFields();
+                }}
+              >
+                取消编辑
+              </Button>
+            ) : null}
+          </Space>
         </Form>
       </Modal>
     </div>

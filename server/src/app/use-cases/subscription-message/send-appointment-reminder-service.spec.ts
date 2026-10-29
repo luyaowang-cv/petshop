@@ -6,7 +6,7 @@ import { AppointmentRepository } from '@app/repositories/appointment-repository'
 import { CustomerRepository } from '@app/repositories/customer-repository';
 import { Customer } from '@app/entities/customer';
 import { Pet, PetType, PetGender } from '@app/entities/pet';
-import { PetshopService, ServiceCategory, ServiceStatus } from '@app/entities/petshop-service';
+import { PetshopService, ServiceStatus } from '@app/entities/petshop-service';
 import {
   AppointmentReminderSubscriptionMessage,
   SubscriptionMessageClient,
@@ -112,7 +112,7 @@ describe('SendAppointmentReminderService', () => {
       title: '洗澡',
       description: '基础洗护',
       value: 5000,
-      category: ServiceCategory.GROOMING,
+      categoryId: 'cat-grooming',
       duration: 60,
       status: ServiceStatus.ACTIVE,
       createdAt: new Date(),
@@ -147,7 +147,7 @@ describe('SendAppointmentReminderService', () => {
       title: '洗澡',
       description: '基础洗护',
       value: 5000,
-      category: ServiceCategory.GROOMING,
+      categoryId: 'cat-grooming',
       duration: 60,
       status: ServiceStatus.ACTIVE,
       createdAt: new Date(),

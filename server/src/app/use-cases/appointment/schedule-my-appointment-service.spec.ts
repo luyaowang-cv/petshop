@@ -1,7 +1,6 @@
 import { Pet, PetType, PetGender } from '@app/entities/pet';
 import {
   PetshopService,
-  ServiceCategory,
   ServiceStatus,
 } from '@app/entities/petshop-service';
 import {
@@ -89,7 +88,7 @@ function makePet(ownerId: string): Pet {
 }
 
 function makeService(): PetshopService {
-  return new PetshopService({ title: '洗护', description: '基础洗护', category: ServiceCategory.GROOMING, value: 100, status: ServiceStatus.ACTIVE, createdAt: new Date(), updatedAt: new Date() });
+  return new PetshopService({ title: '洗护', description: '基础洗护', categoryId: 'cat-grooming', value: 100, status: ServiceStatus.ACTIVE, createdAt: new Date(), updatedAt: new Date() });
 }
 
 describe('ScheduleMyAppointmentService', () => {

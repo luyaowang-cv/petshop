@@ -1,21 +1,19 @@
-import { useState } from 'react'
+import { useMemo, useState } from 'react'
 import Taro, { useDidShow, usePullDownRefresh } from '@tarojs/taro'
 import { View, Text, Image } from '@tarojs/components'
 import { listServices } from '../../services/api'
-import {
-  assetUrl,
-  SERVICE_CATEGORY_EMOJI,
-  SERVICE_CATEGORY_LABEL,
-  STORE_INFO,
-} from '../../constants/config'
+import { assetUrl, STORE_INFO } from '../../constants/config'
 import { Empty } from '../../components/Empty'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { PetshopService } from '../../types'
 import './index.scss'
+
 
 export default function Home() {
   const [services, setServices] = useState<PetshopService[]>([])
   const [loading, setLoading] = useState(true)
+  const [activeCategory, setActiveCategory] = useState('')
 
   useDidShow(() => {
     fetchServices()
@@ -41,23 +39,40 @@ export default function Home() {
     Taro.navigateTo({ url: `/pages/booking/index?serviceId=${service.id}` })
   }
 
-  const goAppointments = () => {
-    Taro.switchTab({ url: '/pages/appointments/index' })
-  }
-
-  const goPets = () => {
-    Taro.navigateTo({ url: '/pages/pets/index' })
-  }
-
-  const callStore = () => {
-    Taro.makePhoneCall({ phoneNumber: STORE_INFO.phone }).catch(() => {
-      Taro.showModal({
-        title: '联系门店',
-        content: `请拨打 ${STORE_INFO.phoneDisplay}`,
-        showCancel: false,
-      })
+  // 按实际在售服务归纳品类（分类来自后端，可自由新增），避免出现空品类
+  const categories = useMemo(() => {
+    const map = new Map<
+      string,
+      { id: string; name: string; icon: string | null; sortOrder: number; total: number }
+    >()
+    services.forEach((s) => {
+      const id = s.category?.id ?? '_uncategorized'
+      const entry = map.get(id) ?? {
+        id,
+        name: s.category?.name ?? '未分类',
+        icon: s.category?.icon ?? null,
+        sortOrder: s.category?.sortOrder ?? 999,
+        total: 0,
+      }
+      entry.total += 1
+      map.set(id, entry)
     })
-  }
+    return Array.from(map.values()).sort(
+      (a, b) => a.sortOrder - b.sortOrder || a.name.localeCompare(b.name),
+    )
+  }, [services])
+
+  const current =
+    categories.some((c) => c.id === activeCategory) || categories.length === 0
+      ? activeCategory
+      : categories[0].id
+
+  const visibleServices = current
+    ? services.filter((s) => (s.category?.id ?? '_uncategorized') === current)
+    : services
+
+  const currentLabel =
+    categories.find((c) => c.id === current)?.name ?? '全部服务'
 
   const renderService = (service: PetshopService) => (
     <View
@@ -73,16 +88,11 @@ export default function Home() {
         />
       ) : (
         <View className='service__thumb service__thumb--placeholder'>
-          {SERVICE_CATEGORY_EMOJI[service.category] ?? '🐾'}
+          {service.category?.icon ?? '🐾'}
         </View>
       )}
       <View className='service__body'>
-        <View className='service__title-row'>
-          <Text className='service__title'>{service.title}</Text>
-          <Text className='service__tag'>
-            {SERVICE_CATEGORY_LABEL[service.category] ?? '服务'}
-          </Text>
-        </View>
+        <Text className='service__title'>{service.title}</Text>
         <Text className='service__desc'>{service.description}</Text>
         <View className='service__bottom'>
           <Text className='service__price'>
@@ -96,6 +106,7 @@ export default function Home() {
 
   return (
     <View className='home'>
+      <PageBg />
       <View className='home__hero'>
         <Text className='home__greet'>欢迎光临</Text>
         <Text className='home__name'>{STORE_INFO.name}</Text>
@@ -105,42 +116,54 @@ export default function Home() {
         </View>
       </View>
 
-      <View className='home__quick'>
-        <View className='home__quick-item' onClick={goAppointments}>
-          <Text className='home__quick-emoji'>📅</Text>
-          <Text className='home__quick-text'>我的预约</Text>
-        </View>
-        <View className='home__quick-divider' />
-        <View className='home__quick-item' onClick={goPets}>
-          <Text className='home__quick-emoji'>🐶</Text>
-          <Text className='home__quick-text'>我的宠物</Text>
-        </View>
-        <View className='home__quick-divider' />
-        <View className='home__quick-item' onClick={callStore}>
-          <Text className='home__quick-emoji'>📞</Text>
-          <Text className='home__quick-text'>联系门店</Text>
-        </View>
-      </View>
+      {loading ? (
+        <Skeleton count={3} />
+      ) : services.length === 0 ? (
+        <Empty
+          title='暂无可用服务'
+          desc='门店还没有上架服务项目，请稍后再来看看'
+        />
+      ) : (
+        <>
+          <View className='section'>
+            <View className='section__head'>
+              <Text className='section__title'>选择服务分类</Text>
+              <Text className='section__extra'>{services.length} 项服务</Text>
+            </View>
+            <View className='category-grid'>
+              {categories.map((c) => (
+                <View
+                  key={c.id}
+                  className={`category ${
+                    current === c.id ? 'category--active' : ''
+                  }`}
+                  onClick={() => setActiveCategory(c.id)}
+                >
+                  <View className='category__icon'>{c.icon ?? '🐾'}</View>
+                  <View className='category__info'>
+                    <Text className='category__name'>{c.name}</Text>
+                    <Text className='category__count'>{c.total} 项</Text>
+                  </View>
+                </View>
+              ))}
+            </View>
+          </View>
 
-      <View className='section'>
-        <View className='section__head'>
-          <Text className='section__title'>服务项目</Text>
-          {!loading && services.length > 0 ? (
-            <Text className='section__extra'>{services.length} 项可选</Text>
-          ) : null}
-        </View>
-
-        {loading ? (
-          <Skeleton count={3} />
-        ) : services.length === 0 ? (
-          <Empty
-            title='暂无可用服务'
-            desc='门店还没有上架服务项目，请稍后再来看看'
-          />
-        ) : (
-          services.map(renderService)
-        )}
-      </View>
+          <View className='section'>
+            <View className='section__head'>
+              <Text className='section__title'>{currentLabel}</Text>
+              <Text className='section__extra'>
+                {visibleServices.length} 项
+              </Text>
+            </View>
+            {visibleServices.length === 0 ? (
+              <Empty title='该分类暂无项目' desc='换一个分类看看吧' />
+            ) : (
+              visibleServices.map(renderService)
+            )}
+          </View>
+        </>
+      )}
     </View>
   )
 }

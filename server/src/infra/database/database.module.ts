@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { CustomerRepository } from '@app/repositories/customer-repository';
 import { PetRepository } from '@app/repositories/pet-repository';
 import { PetshopServiceRepository } from '@app/repositories/petshop-service-repository';
+import { ServiceCategoryRepository } from '@app/repositories/service-category-repository';
 import { AppointmentRepository } from '@app/repositories/appointment-repository';
 import { ProductRepository } from '@app/repositories/product-repository';
 import { ProductOrderRepository } from '@app/repositories/product-order-repository';
@@ -14,6 +15,7 @@ import { SmsConfigRepository } from '@app/repositories/sms-config-repository';
 import { SmsRecordRepository } from '@app/repositories/sms-record-repository';
 import { PrismaService } from './prisma/prisma.service';
 import { PrismaPetshopServiceRepository } from './prisma/repositories/prisma-petshop-service-repository';
+import { PrismaServiceCategoryRepository } from './prisma/repositories/prisma-service-category-repository';
 import { PrismaCustomerRepository } from './prisma/repositories/prisma-customer-repository';
 import { PrismaPetRepository } from './prisma/repositories/prisma-pet-repository';
 import { PrismaAppointmentRepository } from './prisma/repositories/prisma-appointment-repository';
@@ -41,6 +43,10 @@ import { PrismaPaginator } from './prisma/repositories/utils/prisma-paginator';
     {
       provide: PetshopServiceRepository,
       useClass: PrismaPetshopServiceRepository,
+    },
+    {
+      provide: ServiceCategoryRepository,
+      useClass: PrismaServiceCategoryRepository,
     },
     {
       provide: CustomerRepository,
@@ -97,6 +103,7 @@ import { PrismaPaginator } from './prisma/repositories/utils/prisma-paginator';
   ],
   exports: [
     PetshopServiceRepository,
+    ServiceCategoryRepository,
     CustomerRepository,
     PetRepository,
     AppointmentRepository,

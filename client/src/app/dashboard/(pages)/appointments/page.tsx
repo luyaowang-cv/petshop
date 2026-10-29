@@ -254,27 +254,10 @@ export default function Appointments() {
     return customer?.pets || [];
   };
 
-  // 获取服务分类配置
-  const getCategoryConfig = (category?: ServiceCategory) => {
+  // 获取服务分类配置（分类已改为数据表，按名称展示）
+  const getCategoryConfig = (category?: ServiceCategory | null) => {
     if (!category) return { text: "-", color: "default", icon: null };
-    const config = {
-      [ServiceCategory.GROOMING]: {
-        text: "洗护",
-        color: "blue",
-        icon: <ScissorOutlined />,
-      },
-      [ServiceCategory.MEDICAL]: {
-        text: "医疗",
-        color: "red",
-        icon: <MedicineBoxOutlined />,
-      },
-      [ServiceCategory.BOARDING]: {
-        text: "寄养",
-        color: "green",
-        icon: <HomeOutlined />,
-      },
-    };
-    return config[category];
+    return { text: category.name, color: "blue", icon: null };
   };
 
   // 获取状态配置

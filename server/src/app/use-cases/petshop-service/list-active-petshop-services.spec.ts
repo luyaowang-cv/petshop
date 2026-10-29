@@ -1,6 +1,5 @@
 import {
   PetshopService,
-  ServiceCategory,
   ServiceStatus,
 } from '@app/entities/petshop-service';
 import { PetshopServiceRepository } from '@app/repositories/petshop-service-repository';
@@ -35,7 +34,7 @@ function makeService(status: ServiceStatus): PetshopService {
   return new PetshopService({
     title: '洗护',
     description: '基础洗护',
-    category: ServiceCategory.GROOMING,
+    categoryId: 'cat-grooming',
     value: 100,
     status,
     createdAt: new Date(),

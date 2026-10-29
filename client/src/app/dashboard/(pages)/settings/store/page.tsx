@@ -30,7 +30,7 @@ interface StoreInfo {
 }
 
 const defaultStoreInfo: StoreInfo = {
-  name: "爱尚宠物店",
+  name: "吉宠宠物店",
   phone: "138-8888-8888",
   address: "河北省邯郸市魏县",
   businessHours: "周一至周日 09:00-21:00",

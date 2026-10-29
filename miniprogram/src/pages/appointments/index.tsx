@@ -6,6 +6,7 @@ import { APPOINTMENT_STATUS_LABEL } from '../../constants/config'
 import { formatDateTime } from '../../utils/format'
 import { Empty } from '../../components/Empty'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { Appointment } from '../../types'
 import './index.scss'
 
@@ -145,6 +146,7 @@ export default function Appointments() {
 
   return (
     <View className='appointments'>
+      <PageBg />
       {loading ? (
         <Skeleton count={3} variant='card' />
       ) : appointments.length === 0 ? (

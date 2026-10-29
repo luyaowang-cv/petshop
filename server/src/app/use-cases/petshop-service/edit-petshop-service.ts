@@ -1,14 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { PetshopServiceRepository } from '@app/repositories/petshop-service-repository';
+import { ServiceCategoryRepository } from '@app/repositories/service-category-repository';
 import { EntityNotFound } from '../errors/entity-not-found';
-import { ServiceCategory, ServiceStatus } from '@app/entities/petshop-service';
+import { ServiceStatus } from '@app/entities/petshop-service';
 
 interface EditPetshopServiceRequest {
   id: string;
   body: {
     title: string;
     description: string;
-    category: ServiceCategory;
+    categoryId: string;
     value: number;
     duration: number;
     status?: ServiceStatus;
@@ -18,7 +19,10 @@ interface EditPetshopServiceRequest {
 
 @Injectable()
 export class EditPetshopService {
-  constructor(private petshopServiceRepository: PetshopServiceRepository) {}
+  constructor(
+    private petshopServiceRepository: PetshopServiceRepository,
+    private serviceCategoryRepository: ServiceCategoryRepository,
+  ) {}
 
   async execute(request: EditPetshopServiceRequest) {
     const petshopService = await this.petshopServiceRepository.findById(
@@ -30,9 +34,15 @@ export class EditPetshopService {
     }
     const body = request.body;
 
+    const category = await this.serviceCategoryRepository.findById(
+      body.categoryId,
+    );
+    if (!category) throw new EntityNotFound('ServiceCategory', body.categoryId);
+
     petshopService.title = body.title;
     petshopService.description = body.description;
-    petshopService.category = body.category;
+    petshopService.categoryId = category.id;
+    petshopService.category = category;
     petshopService.duration = body.duration;
     petshopService.value = body.value;
     if (body.status) {

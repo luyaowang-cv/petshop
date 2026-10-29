@@ -14,7 +14,7 @@ export default defineAppConfig({
     backgroundTextStyle: 'light',
     backgroundColor: '#F6F7F9',
     navigationBarBackgroundColor: '#ffffff',
-    navigationBarTitleText: '爱尚宠物',
+    navigationBarTitleText: '吉宠宠物',
     navigationBarTextStyle: 'black',
   },
   tabBar: {

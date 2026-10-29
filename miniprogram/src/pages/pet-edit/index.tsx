@@ -16,6 +16,7 @@ import {
   PET_TYPE_LABEL,
 } from '../../constants/config'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { PetGender, PetInput, PetType } from '../../types'
 import './index.scss'
 
@@ -137,6 +138,7 @@ export default function PetEdit() {
 
   return (
     <View className='pet-edit'>
+      <PageBg />
       <View className='pet-edit__photo' onClick={chooseImage}>
         {imageUrl ? (
           <Image

@@ -1,12 +1,17 @@
+/* 「我的」页与首页统一使用暖黄色调 */
 .me {
+  --c-primary: #e8890c;
+  --c-primary-dark: #b45309;
+  --c-primary-soft: #fff4e0;
+
   padding-bottom: 40px;
 }
 
 /* ---------- 顶部 ---------- */
 .me__hero {
   padding: 56px 40px 88px;
-  /* 顶部与导航栏同色，避免出现色阶断层 */
-  background: linear-gradient(180deg, #1d4ed8 0%, #2b5ce6 46%, #16337f 100%);
+  /* 顶部与导航栏同色，避免色阶断层 */
+  background: linear-gradient(180deg, #ffd98a 0%, #ffcb63 60%, #ffc04a 100%);
   border-radius: 0 0 40px 40px;
 }
 
@@ -19,7 +24,7 @@
   width: 128px;
   height: 128px;
   border-radius: 50%;
-  border: 4px solid rgba(255, 255, 255, 0.6);
+  border: 4px solid rgba(255, 255, 255, 0.85);
   flex-shrink: 0;
   background: #fff;
 }
@@ -29,7 +34,7 @@
   align-items: center;
   justify-content: center;
   font-size: 56px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #fff;
 }
 
 .me__info {
@@ -43,7 +48,7 @@
 .me__name {
   font-size: 38px;
   font-weight: 600;
-  color: #fff;
+  color: #5a3a00;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -54,20 +59,20 @@
   margin-top: 12px;
   font-size: 22px;
   line-height: 1;
-  color: #fff;
-  background: rgba(255, 255, 255, 0.24);
+  color: #a06a1d;
+  background: rgba(255, 255, 255, 0.72);
   padding: 8px 18px;
   border-radius: 999px;
 }
 
 .me__level--vip {
-  color: #6b3d00;
-  background: linear-gradient(135deg, #ffe08a, #f5b93c);
+  color: #ffd98a;
+  background: #5a3a00;
 }
 
 .me__chevron {
   font-size: 40px;
-  color: rgba(255, 255, 255, 0.75);
+  color: rgba(90, 58, 0, 0.45);
   line-height: 1;
 }
 

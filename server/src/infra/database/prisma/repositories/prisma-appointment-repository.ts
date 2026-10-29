@@ -35,7 +35,7 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
       },
       include: {
         pet: true,
-        service: true,
+        service: { include: { category: true } },
       }
     })
 
@@ -53,7 +53,7 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
       },
       include: {
         pet: true,
-        service: true,
+        service: { include: { category: true } },
       },
       orderBy: {
         appointmentTime: 'asc',
@@ -72,7 +72,7 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
       },
       include: {
         pet: true,
-        service: true,
+        service: { include: { category: true } },
       },
       orderBy: {
         appointmentTime: 'desc',
@@ -108,7 +108,7 @@ export class PrismaAppointmentRepository implements AppointmentRepository {
       ],
       include: {
         pet: true,
-        service: true
+        service: { include: { category: true } }
       }
     }
 

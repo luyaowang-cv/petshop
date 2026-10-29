@@ -31,7 +31,10 @@ export class PrismaPetshopServiceRepository implements PetshopServiceRepository 
     const service = await this.prismaService.petshopService.findUnique({
       where: {
         id,
-      }
+      },
+      include: {
+        category: true,
+      },
     })
 
     if (!service) return null
@@ -39,7 +42,12 @@ export class PrismaPetshopServiceRepository implements PetshopServiceRepository 
   }
 
   async findMany(): Promise<PetshopService[]> {
-    const petshopServices = await this.prismaService.petshopService.findMany()
+    const petshopServices = await this.prismaService.petshopService.findMany({
+      include: {
+        category: true,
+      },
+      orderBy: [{ createdAt: 'asc' }],
+    })
 
     return petshopServices.map(PetshopServiceMapper.toDomain)
   }

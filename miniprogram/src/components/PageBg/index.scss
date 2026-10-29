@@ -1,0 +1,26 @@
+.page-bg {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden;
+  /* 垫在页面内容之下，同时盖住 page 的纯色背景 */
+  z-index: -1;
+  pointer-events: none;
+}
+
+.page-bg__img {
+  width: 100%;
+  height: 100%;
+}
+
+/* 奶油色蒙版：保留暖调的同时压住底图，保证正文对比度 */
+.page-bg__mask {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(255, 251, 244, 0.58);
+}

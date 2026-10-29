@@ -1,10 +1,4 @@
-import { Length, Max, Min, IsInt, IsEnum, IsOptional, IsString } from 'class-validator';
-
-export enum ServiceCategory {
-  GROOMING = 'GROOMING',
-  MEDICAL = 'MEDICAL',
-  BOARDING = 'BOARDING',
-}
+import { Length, Max, Min, IsInt, IsEnum, IsOptional, IsString, IsUUID } from 'class-validator';
 
 export enum ServiceStatus {
   ACTIVE = 'ACTIVE',
@@ -18,8 +12,8 @@ export class CreatePetshopServiceBody {
   @Length(0, 500)
   description: string;
 
-  @IsEnum(ServiceCategory)
-  category: ServiceCategory;
+  @IsUUID()
+  categoryId: string;
 
   @Min(1)
   @Max(1_000_000_000) // max of 1_000_000_000 in cents --> 10_000_000 yuan

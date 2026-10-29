@@ -125,20 +125,34 @@ model Pet {
 }
 
 model PetshopService {
-  id          String          @id @default(uuid())
+  id          String           @id @default(uuid())
   imageUrl    String?
   title       String
   description String
   value       Int
   duration    Int?
-  category    ServiceCategory @default(GROOMING)
-  createdAt   DateTime        @default(now())
-  status      ServiceStatus   @default(ACTIVE)
-  updatedAt   DateTime        @updatedAt
+  categoryId  String?
+  category    ServiceCategory? @relation(fields: [categoryId], references: [id], onDelete: SetNull)
+  createdAt   DateTime         @default(now())
+  status      ServiceStatus    @default(ACTIVE)
+  updatedAt   DateTime         @updatedAt
   Appointment Appointment[]
 
-  @@index([category])
+  @@index([categoryId])
   @@index([status])
+}
+
+/// 服务分类（可在工作台自由新增，如「美容」）
+model ServiceCategory {
+  id        String          @id @default(uuid())
+  name      String          @unique
+  icon      String?
+  sortOrder Int             @default(0)
+  createdAt DateTime        @default(now())
+  updatedAt DateTime        @updatedAt
+  services  PetshopService[]
+
+  @@map("service_categories")
 }
 
 model PointsRecord {
@@ -372,12 +386,6 @@ enum ProductOrderStatus {
 enum ProductStatus {
   ACTIVE
   INACTIVE
-}
-
-enum ServiceCategory {
-  GROOMING
-  MEDICAL
-  BOARDING
 }
 
 enum ServiceStatus {

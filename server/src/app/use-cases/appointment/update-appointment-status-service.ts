@@ -78,9 +78,13 @@ export class UpdateAppointmentStatusService {
     // 2. 更新最近到店时间
     customer.lastVisitAt = new Date();
 
-    // 3. 如果是洗护服务，更新宠物的最近洗护时间
+    // 3. 如果是洗护类服务，更新宠物的最近洗护时间
+    // 分类已改为可在工作台自由新增，这里按分类名 + 标题关键字判断
+    const categoryName: string = appointment.service.categoryName ?? '';
     const isGroomingService =
-      appointment.service.category === 'GROOMING' ||
+      categoryName.includes('洗护') ||
+      categoryName.includes('美容') ||
+      categoryName.includes('洗澡') ||
       appointment.service.title.includes('洗护') ||
       appointment.service.title.includes('美容') ||
       appointment.service.title.includes('洗澡');

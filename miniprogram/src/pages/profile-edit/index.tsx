@@ -3,6 +3,7 @@ import Taro, { useLoad } from '@tarojs/taro'
 import { View, Text, Image, Button, Input } from '@tarojs/components'
 import { getMe, updateMyProfile, uploadImage } from '../../services/api'
 import { assetUrl } from '../../constants/config'
+import { PageBg } from '../../components/PageBg'
 import './index.scss'
 
 export default function ProfileEdit() {
@@ -53,6 +54,7 @@ export default function ProfileEdit() {
 
   return (
     <View className='profile-edit'>
+      <PageBg />
       <View className='profile-edit__avatar-card'>
         <Button
           className='profile-edit__avatar-btn'

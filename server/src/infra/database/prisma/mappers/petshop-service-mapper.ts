@@ -1,9 +1,13 @@
+import { PetshopService, ServiceStatus } from '@app/entities/petshop-service';
 import {
-  PetshopService,
-  ServiceCategory,
-  ServiceStatus,
-} from '@app/entities/petshop-service';
-import { PetshopService as RawPetshopService } from '@prisma/client';
+  PetshopService as RawPetshopService,
+  ServiceCategory as RawServiceCategory,
+} from '@prisma/client';
+import { ServiceCategoryMapper } from './service-category-mapper';
+
+export type RawPetshopServiceWithCategory = RawPetshopService & {
+  category?: RawServiceCategory | null;
+};
 
 export class PetshopServiceMapper {
   static toPrisma(petshopService: PetshopService) {
@@ -11,7 +15,7 @@ export class PetshopServiceMapper {
       id: petshopService.id,
       title: petshopService.title,
       description: petshopService.description,
-      category: petshopService.category,
+      categoryId: petshopService.categoryId,
       duration: petshopService.duration,
       value: petshopService.value,
       imageUrl: petshopService.imageUrl,
@@ -21,12 +25,15 @@ export class PetshopServiceMapper {
     };
   }
 
-  static toDomain(raw: RawPetshopService) {
+  static toDomain(raw: RawPetshopServiceWithCategory) {
     return new PetshopService(
       {
         title: raw.title,
         description: raw.description,
-        category: raw.category as ServiceCategory,
+        categoryId: raw.categoryId,
+        category: raw.category
+          ? ServiceCategoryMapper.toDomain(raw.category)
+          : null,
         duration: raw.duration ?? undefined,
         value: raw.value,
         imageUrl: raw.imageUrl,

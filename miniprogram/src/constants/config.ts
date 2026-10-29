@@ -3,9 +3,15 @@
 // 真机/部署（阶段 A）：https://pet-api.offerscoming.cn
 export const API_BASE_URL = 'https://pet-api.offerscoming.cn'
 
+// 登录页封面（720x1280，已压缩到 ~106KB）
+export const LOGIN_COVER = '/assets/login-cover.jpg'
+
+// 登录后各页面统一的背景图（已预先做高斯模糊，运行时无需 CSS filter）
+export const PAGE_BG = '/assets/page-bg.jpg'
+
 // 门店信息（暂无后端接口，先由前端维护；后台「门店信息」页接入接口后可改为读取）
 export const STORE_INFO = {
-  name: '爱尚宠物店',
+  name: '吉宠宠物店',
   phone: '13888888888',
   phoneDisplay: '138-8888-8888',
   address: '河北省邯郸市魏县',
@@ -40,18 +46,6 @@ export const APPOINTMENT_STATUS_LABEL: Record<string, string> = {
   COMPLETED: '已完成',
   DONE: '已完成',
   PENDING_PAYMENT: '待支付',
-}
-
-export const SERVICE_CATEGORY_LABEL: Record<string, string> = {
-  GROOMING: '洗护',
-  MEDICAL: '医疗',
-  BOARDING: '寄养',
-}
-
-export const SERVICE_CATEGORY_EMOJI: Record<string, string> = {
-  GROOMING: '🛁',
-  MEDICAL: '💊',
-  BOARDING: '🏠',
 }
 
 export const MEMBER_LEVEL_LABEL: Record<string, string> = {

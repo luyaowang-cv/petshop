@@ -5,6 +5,7 @@ import { listPets } from '../../services/api'
 import { assetUrl, PET_GENDER_LABEL, PET_TYPE_LABEL } from '../../constants/config'
 import { Empty } from '../../components/Empty'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { Pet } from '../../types'
 import './index.scss'
 
@@ -42,6 +43,7 @@ export default function Pets() {
 
   return (
     <View className='pets'>
+      <PageBg />
       {loading ? (
         <Skeleton count={3} variant='avatar' />
       ) : pets.length === 0 ? (

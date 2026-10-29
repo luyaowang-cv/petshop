@@ -8,6 +8,7 @@ import {
   STORE_INFO,
 } from '../../constants/config'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { Me } from '../../types'
 import './index.scss'
 
@@ -61,6 +62,7 @@ export default function MePage() {
 
   return (
     <View className='me'>
+      <PageBg />
       <View className='me__hero'>
         <View className='me__user' onClick={goProfileEdit}>
           {me?.avatarUrl ? (

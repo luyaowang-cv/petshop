@@ -1,4 +1,4 @@
-import { PetshopService } from "@/@types/PetshopServices";
+import { PetshopService, PetshopServiceBodyData } from "@/@types/PetshopServices";
 import api from "../api";
 
 // Query key
@@ -22,7 +22,7 @@ export async function fetchPetshopService(id: string) {
 }
 
 export async function createPetshopService(
-  petshopService: Omit<PetshopService, "id" | "createdAt" | "updatedAt">,
+  petshopService: PetshopServiceBodyData,
 ) {
   await api.post("/services", {
     ...petshopService,
@@ -31,7 +31,7 @@ export async function createPetshopService(
 
 export async function updatePetshopService(
   id: string,
-  petshopService: Omit<PetshopService, "id" | "createdAt" | "updatedAt">,
+  petshopService: PetshopServiceBodyData,
 ) {
   await api.put(`/services/${id}`, {
     ...petshopService,

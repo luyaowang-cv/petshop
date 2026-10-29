@@ -1,10 +1,5 @@
 import { BaseEntity } from './base-entity';
-
-export enum ServiceCategory {
-  GROOMING = 'GROOMING', // 洗护
-  MEDICAL = 'MEDICAL', // 医疗
-  BOARDING = 'BOARDING', // 寄养
-}
+import { ServiceCategory } from './service-category';
 
 export enum ServiceStatus {
   ACTIVE = 'ACTIVE', // 启用
@@ -14,7 +9,10 @@ export enum ServiceStatus {
 export interface PetshopServiceProps {
   title: string;
   description: string;
-  category: ServiceCategory;
+  /** 所属分类 id（可选，分类被删除后会置空） */
+  categoryId?: string | null;
+  /** 关联的分类对象，查询时一并带出 */
+  category?: ServiceCategory | null;
   value: number;
   duration?: number; // 可选，保留以便后续扩展
   imageUrl?: string | null;
@@ -40,12 +38,25 @@ export class PetshopService extends BaseEntity<PetshopServiceProps> {
     this.props.description = description;
   }
 
-  public get category() {
-    return this.props.category;
+  public get categoryId() {
+    return this.props.categoryId ?? null;
   }
 
-  public set category(category: ServiceCategory) {
-    this.props.category = category;
+  public set categoryId(categoryId: string | null | undefined) {
+    this.props.categoryId = categoryId ?? null;
+  }
+
+  public get category() {
+    return this.props.category ?? null;
+  }
+
+  public set category(category: ServiceCategory | null | undefined) {
+    this.props.category = category ?? null;
+  }
+
+  /** 分类名称，便于业务判断（如是否属于洗护类） */
+  public get categoryName() {
+    return this.props.category?.name ?? null;
   }
 
   public get value() {

@@ -8,6 +8,7 @@ import {
   listServices,
 } from '../../services/api'
 import { Skeleton } from '../../components/Skeleton'
+import { PageBg } from '../../components/PageBg'
 import type { Pet, PetshopService } from '../../types'
 import './index.scss'
 
@@ -146,6 +147,7 @@ export default function Booking() {
 
   return (
     <View className='booking'>
+      <PageBg />
       {service ? (
         <View className='booking__service card'>
           <Text className='booking__service-title'>{service.title}</Text>

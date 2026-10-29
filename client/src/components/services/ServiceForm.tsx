@@ -7,9 +7,12 @@ import { convertCentsToReais, maskNumberToCurrency, parseMaskedCurrencyValueToNu
 import { parseTimeStringToDuration, parseSecondsToTimeDurationString } from "@/utils/timeDuration";
 import { SubmitHandler, useForm } from "react-hook-form";
 import { PetshopServiceBodyData, PetshopService } from "src/@types/PetshopServices";
+import { useQuery } from "@tanstack/react-query";
+import { fetchServiceCategories, SERVICECATEGORY_KEY } from "@/services/queries/ServiceCategories";
 import { z } from "zod";
 
 const petshopServiceSchema = z.object({
+  categoryId: z.string().min(1, "Selecione a categoria do serviço"),
   title: z.string().min(1, "O título é obrigatório").max(60, "Tamanho máximo do título é de 60 caracteres"),
   description: z
     .string()
@@ -55,12 +58,19 @@ export function ServiceForm(props: Props) {
   } = useForm<PetshopServiceFormData>({
     resolver: zodResolver(petshopServiceSchema),
     defaultValues: {
+      categoryId: props.service?.categoryId ?? "",
       title: props.service?.title ?? "",
       description: props.service?.description ?? "",
       value: props.service ? maskNumberToCurrency(convertCentsToReais(props.service?.value)) : "0,00",
       duration: parseSecondsToTimeDurationString(props.service?.duration ?? 3600),
     },
   });
+
+  const { data: categoriesData } = useQuery({
+    queryKey: [SERVICECATEGORY_KEY],
+    queryFn: fetchServiceCategories,
+  });
+  const categories = categoriesData?.categories ?? [];
 
   const getSubmitButtonText = () => (props.service ? "Editar" : "Criar");
 
@@ -78,6 +88,30 @@ export function ServiceForm(props: Props) {
     <form onSubmit={handleSubmit(handleFormSubmit)} className="w-full max-w-2xl mt-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 sm:gap-4">
         <div className="flex flex-col gap-2">
+          <fieldset>
+            <label htmlFor="categoryId" className="block text-sm mb-1">
+              Categoria
+            </label>
+            <select
+              id="categoryId"
+              className="w-full border rounded px-3 py-2"
+              {...register("categoryId")}
+            >
+              <option value="">Selecione a categoria</option>
+              {categories.map((category) => (
+                <option key={category.id} value={category.id}>
+                  {category.icon ? `${category.icon} ` : ""}
+                  {category.name}
+                </option>
+              ))}
+            </select>
+            {errors.categoryId?.message ? (
+              <span className="text-red-500 text-sm">
+                {errors.categoryId.message}
+              </span>
+            ) : null}
+          </fieldset>
+
           <fieldset>
             <Input label="Título" id="title" errorMessage={errors.title?.message} {...register("title")} />
           </fieldset>
