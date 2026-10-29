@@ -1,5 +1,20 @@
 .booking {
-  padding-bottom: 160px;
+  /* 给顶部固定操作栏让位 */
+  padding-top: 140px;
+  padding-bottom: 40px;
+}
+
+/* ---------- 顶部提交栏 ---------- */
+.booking__topbar {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 999;
+  padding: 20px 30px;
+  background: rgba(255, 251, 244, 0.97);
+  border-bottom: 1px solid var(--c-border);
+  box-shadow: 0 6px 20px rgba(43, 47, 54, 0.06);
 }
 
 .booking__service {
@@ -103,8 +118,8 @@
 }
 
 .booking__submit {
-  position: fixed;
-  left: 30px;
-  right: 30px;
-  bottom: 40px;
+  width: 100%;
+  /* 顶部栏里的按钮略矮一点，避免占太多首屏 */
+  padding: 22px 0;
+  font-size: 30px;
 }

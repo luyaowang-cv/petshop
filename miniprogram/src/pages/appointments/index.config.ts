@@ -1,8 +1,8 @@
 export default definePageConfig({
   navigationBarTitleText: '我的预约',
-  navigationBarBackgroundColor: '#FFD98A',
+  navigationBarBackgroundColor: '#FFFFFF',
   navigationBarTextStyle: 'black',
   enablePullDownRefresh: true,
-  backgroundColor: '#FFD98A',
+  backgroundColor: '#F6F7F9',
   backgroundTextStyle: 'dark',
 })
