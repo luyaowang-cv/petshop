@@ -53,16 +53,31 @@ flock -n /tmp/petshop-deploy.lock /root/watch-deploy-petshop.sh
 
 ```bash
 # 1. 在服务器上用一次性容器跑迁移（挂载迁移目录 + 连到 job-assistant_default 网络的 DB）
+#    注意两个坑：
+#    - schema.prisma 用的是 env("DB_URL")，不是 DATABASE_URL，传错会报 P1012
+#    - node:20-slim 没装 openssl，Prisma 引擎起不来（报 "Schema engine error" 且没有详情），
+#      所以要先 apt-get install openssl
 cd /root/petshop/server
 DB_PASS=$(grep '^PETSHOP_DB_PASSWORD=' /root/petshop/server/.env | cut -d= -f2-)
 docker run --rm -v "$PWD/prisma:/app/prisma" --network job-assistant_default \
-  -e DATABASE_URL="postgresql://petshop:${DB_PASS}@job-assistant-db:5432/petshop?schema=public" \
-  node:20-slim sh -c "cd /app && npx --yes prisma@5 migrate deploy"
+  -e DB_URL="postgresql://petshop:${DB_PASS}@job-assistant-db:5432/petshop?schema=public" \
+  node:20-slim sh -c "apt-get update -y >/dev/null && apt-get install -y openssl >/dev/null && cd /app && npx --yes prisma@5 migrate deploy"
 
 # 2. 解除暂停：把 git 前进到最新，再手动触发部署
 cd /root/petshop && git pull --ff-only
 flock -n /tmp/petshop-deploy.lock /root/watch-deploy-petshop.sh
 ```
+
+> 顺序很重要：**先迁移、后 pull**。守护脚本的判断条件是「`HEAD` 与 `origin/main` 有 migrations 差异」，
+> 一旦 `git pull` 到最新，下一轮 cron（每 2 分钟）立刻就会部署新镜像。如果要严格避免
+> 「新代码先上、表还没建」的空窗，把 pull + 迁移 + 部署串在一条持锁的命令里执行：
+>
+> ```bash
+> exec 9>/tmp/petshop-deploy.lock; flock -n 9 || exit 1   # 挡住 cron
+> cd /root/petshop && git pull --ff-only
+> # ... 执行上面的迁移命令 ...
+> bash /root/watch-deploy-petshop.sh                       # 迁移完成后立刻部署
+> ```
 
 ## 密钥（务必只留在服务器，不上 git）
 
