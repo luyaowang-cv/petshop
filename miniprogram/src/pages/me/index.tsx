@@ -43,6 +43,14 @@ export default function MePage() {
     Taro.navigateTo({ url: '/pages/profile-edit/index' })
   }
 
+  const goConsumption = () => {
+    Taro.navigateTo({ url: '/pages/consumption-records/index' })
+  }
+
+  const goPoints = () => {
+    Taro.navigateTo({ url: '/pages/points-records/index' })
+  }
+
   const callStore = () => {
     Taro.makePhoneCall({ phoneNumber: STORE_INFO.phone }).catch(() => {
       Taro.showModal({
@@ -56,6 +64,8 @@ export default function MePage() {
   const menuItems = [
     { icon: '🐶', label: '我的宠物', onClick: goPets },
     { icon: '📅', label: '我的预约', onClick: goAppointments },
+    { icon: '🧾', label: '消费记录', onClick: goConsumption },
+    { icon: '⭐', label: '积分明细', onClick: goPoints },
     { icon: '📞', label: '联系门店', onClick: callStore },
     { icon: '✏️', label: '编辑资料', onClick: goProfileEdit },
   ]
@@ -99,9 +109,9 @@ export default function MePage() {
             <Text className='me__stat-label'>余额</Text>
           </View>
           <View className='me__divider' />
-          <View className='me__stat'>
+          <View className='me__stat' onClick={goPoints}>
             <Text className='me__stat-value'>{me?.memberPoints ?? 0}</Text>
-            <Text className='me__stat-label'>积分</Text>
+            <Text className='me__stat-label'>积分 ›</Text>
           </View>
         </View>
       )}

@@ -1,20 +1,6 @@
 .booking {
-  /* 给顶部固定操作栏让位 */
-  padding-top: 140px;
-  padding-bottom: 40px;
-}
-
-/* ---------- 顶部提交栏 ---------- */
-.booking__topbar {
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 999;
-  padding: 20px 30px;
-  background: rgba(255, 251, 244, 0.97);
-  border-bottom: 1px solid var(--c-border);
-  box-shadow: 0 6px 20px rgba(43, 47, 54, 0.06);
+  /* 给底部固定按钮留出空间，避免遮住备注 */
+  padding-bottom: 220px;
 }
 
 .booking__service {
@@ -118,8 +104,11 @@
 }
 
 .booking__submit {
-  width: 100%;
-  /* 顶部栏里的按钮略矮一点，避免占太多首屏 */
-  padding: 22px 0;
-  font-size: 30px;
+  position: fixed;
+  left: 30px;
+  right: 30px;
+  bottom: calc(40px + env(safe-area-inset-bottom));
+  /* 关键：备注用的是原生 textarea，没有 z-index 时它会按 DOM 顺序压住按钮 */
+  z-index: 999;
+  box-shadow: 0 8px 24px rgba(29, 78, 216, 0.25);
 }

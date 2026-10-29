@@ -172,18 +172,6 @@ export default function Booking() {
     <View className='booking'>
       <PageBg />
 
-      {/* 提交按钮固定在顶部：底部区域会被备注的原生 textarea 覆盖，点不到 */}
-      <View className='booking__topbar'>
-        <View
-          className={`booking__submit btn-primary ${
-            submitDisabled ? 'is-disabled' : ''
-          }`}
-          onClick={onSubmit}
-        >
-          提交预约
-        </View>
-      </View>
-
       {service ? (
         <View className='booking__service card'>
           <Text className='booking__service-title'>{service.title}</Text>
@@ -247,6 +235,16 @@ export default function Booking() {
             placeholder='如：狗狗怕水，请温柔一些'
           />
         </View>
+      </View>
+
+      {/* z-index 必须高于备注的 textarea，否则原生组件会按 DOM 顺序压住按钮 */}
+      <View
+        className={`booking__submit btn-primary ${
+          submitDisabled ? 'is-disabled' : ''
+        }`}
+        onClick={onSubmit}
+      >
+        提交预约
       </View>
     </View>
   )

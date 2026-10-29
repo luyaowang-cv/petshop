@@ -1,0 +1,75 @@
+.points {
+  padding-bottom: 40px;
+}
+
+.points__summary {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.points__value {
+  font-size: 64px;
+  font-weight: 600;
+  color: var(--c-primary);
+  line-height: 1.1;
+}
+
+.points__label {
+  margin-top: 10px;
+  font-size: 24px;
+  color: var(--c-text-3);
+}
+
+.point {
+  display: flex;
+  align-items: center;
+}
+
+.point__main {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.point__reason {
+  font-size: 28px;
+  color: var(--c-text);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.point__time {
+  margin-top: 10px;
+  font-size: 24px;
+  color: var(--c-text-3);
+}
+
+.point__right {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  margin-left: 20px;
+  flex-shrink: 0;
+}
+
+.point__delta {
+  font-size: 34px;
+  font-weight: 600;
+}
+
+.point__delta--up {
+  color: var(--c-success);
+}
+
+.point__delta--down {
+  color: var(--c-danger);
+}
+
+.point__balance {
+  margin-top: 8px;
+  font-size: 22px;
+  color: var(--c-text-3);
+}

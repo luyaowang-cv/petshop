@@ -39,16 +39,19 @@ export class GetCustomerConsumptionRecordsService {
   ): Promise<GetCustomerConsumptionRecordsResponse> {
     const { customerId, page = 1, pageSize = 20 } = request;
 
-    // 获取商品订单（只获取已完成的）
-    const { orders: productOrders } =
+    // 获取商品订单：收银台下单是 CONFIRMED，订单页「完成」后是 COMPLETED，
+    // 两者都属于已消费；PENDING / CANCELED 不计入
+    const { orders: allProductOrders } =
       await this.productOrderRepository.findMany(
-        {
-          customerId,
-          status: ProductOrderStatus.CONFIRMED, // 收银台创建的订单直接是CONFIRMED状态
-        },
+        { customerId },
         undefined,
         undefined,
       );
+    const productOrders = allProductOrders.filter(
+      (order) =>
+        order.status === ProductOrderStatus.CONFIRMED ||
+        order.status === ProductOrderStatus.COMPLETED,
+    );
 
     // 获取所有已完成的预约
     const { data: allAppointments } =
