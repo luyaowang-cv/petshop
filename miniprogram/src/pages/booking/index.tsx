@@ -12,10 +12,33 @@ import { PageBg } from '../../components/PageBg'
 import type { Pet, PetshopService } from '../../types'
 import './index.scss'
 
-// 预约时段：上午 / 下午，30 分钟一段（整店独占）
-const MORNING_SLOTS = ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30']
-const AFTERNOON_SLOTS = ['14:00', '14:30', '15:00', '15:30', '16:00', '16:30', '17:00', '17:30']
+// 预约时段：上午 / 下午 / 晚上，30 分钟一段（整店独占）
+const SLOT_GROUPS = [
+  {
+    title: '上午',
+    slots: ['09:00', '09:30', '10:00', '10:30', '11:00', '11:30'],
+  },
+  {
+    title: '下午',
+    slots: [
+      '13:00',
+      '13:30',
+      '14:00',
+      '14:30',
+      '15:00',
+      '15:30',
+      '16:00',
+      '16:30',
+      '17:00',
+    ],
+  },
+  { title: '晚上', slots: ['18:00', '18:30', '19:00'] },
+]
 const SLOT_MS = 30 * 60 * 1000
+
+// 查询某天占用情况的时间范围（覆盖首末时段）
+const DAY_START = '09:00:00'
+const DAY_END = '19:30:00'
 
 export default function Booking() {
   const router = useRouter()
@@ -59,8 +82,8 @@ export default function Booking() {
     }
     try {
       // 后端按 UTC 范围查询；起始/结束用与提交预约相同的本地时间约定
-      const startDate = new Date(`${next}T09:00:00`).toISOString()
-      const endDate = new Date(`${next}T18:00:00`).toISOString()
+      const startDate = new Date(`${next}T${DAY_START}`).toISOString()
+      const endDate = new Date(`${next}T${DAY_END}`).toISOString()
       const res = await getAppointmentAvailability(startDate, endDate)
       setBookedTimes(res.bookedTimes)
     } catch {
@@ -192,10 +215,12 @@ export default function Booking() {
 
       {date ? (
         <View className='card'>
-          <Text className='booking__slots-title'>上午</Text>
-          {renderSlots(MORNING_SLOTS)}
-          <Text className='booking__slots-title'>下午</Text>
-          {renderSlots(AFTERNOON_SLOTS)}
+          {SLOT_GROUPS.map((group) => (
+            <View key={group.title}>
+              <Text className='booking__slots-title'>{group.title}</Text>
+              {renderSlots(group.slots)}
+            </View>
+          ))}
         </View>
       ) : null}
 

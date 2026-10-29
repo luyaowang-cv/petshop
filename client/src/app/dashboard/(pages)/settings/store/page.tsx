@@ -31,9 +31,9 @@ interface StoreInfo {
 
 const defaultStoreInfo: StoreInfo = {
   name: "吉宠宠物店",
-  phone: "138-8888-8888",
-  address: "河北省邯郸市魏县",
-  businessHours: "周一至周日 09:00-21:00",
+  phone: "173-3132-6049",
+  address: "魏县天安大道西段与魏都南大街交叉口西南工商银行南20米",
+  businessHours: "周一至周日 09:00-20:00",
   description: "专业的宠物服务，为您的爱宠提供最优质的照顾。",
 };
 

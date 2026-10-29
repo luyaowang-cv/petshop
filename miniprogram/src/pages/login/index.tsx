@@ -8,7 +8,9 @@ import './index.scss'
 
 export default function Login() {
   const [loading, setLoading] = useState(false)
-  const [avatarTempPath, setAvatarTempPath] = useState('')
+  // 手机号授权成功后，若还没有头像，再询问是否用微信头像
+  const [askAvatar, setAskAvatar] = useState(false)
+  const [savingAvatar, setSavingAvatar] = useState(false)
 
   useLoad(() => {
     if (isLoggedIn()) {
@@ -16,9 +18,8 @@ export default function Login() {
     }
   })
 
-  const handleChooseAvatar = (e: any) => {
-    const url = e?.detail?.avatarUrl
-    if (url) setAvatarTempPath(url)
+  const goHome = () => {
+    Taro.switchTab({ url: '/pages/home/index' })
   }
 
   const handleGetPhoneNumber = async (e: any) => {
@@ -38,20 +39,14 @@ export default function Login() {
       const result = await login(code, phoneCode)
       setAuth(result.accessToken, result.refreshToken)
 
-      // 登录后再上传已选择的头像（上传接口需要登录态）
-      if (avatarTempPath) {
-        try {
-          const url = await uploadImage(avatarTempPath)
-          await updateMyProfile({ avatarUrl: url })
-        } catch {
-          // 头像上传失败不阻断登录
-        }
-      }
-
       Taro.showToast({ title: '登录成功', icon: 'success' })
-      setTimeout(() => {
-        Taro.switchTab({ url: '/pages/home/index' })
-      }, 500)
+
+      // 老用户已有头像就直接进首页；新用户顺势问一句要不要用微信头像
+      if (result.customer?.avatarUrl) {
+        setTimeout(goHome, 500)
+        return
+      }
+      setAskAvatar(true)
     } catch (err) {
       const message = (err as Error)?.message || '登录失败'
       Taro.showToast({ title: message, icon: 'none' })
@@ -60,41 +55,64 @@ export default function Login() {
     }
   }
 
+  const handleChooseAvatar = async (e: any) => {
+    const tempPath = e?.detail?.avatarUrl
+    if (!tempPath || savingAvatar) return
+
+    setSavingAvatar(true)
+    try {
+      const url = await uploadImage(tempPath)
+      await updateMyProfile({ avatarUrl: url })
+      Taro.showToast({ title: '头像已设置', icon: 'success' })
+    } catch (err) {
+      // 头像不是关键路径，失败不影响进入首页
+      Taro.showToast({ title: '头像设置失败，可稍后在「我的」里修改', icon: 'none' })
+    } finally {
+      setSavingAvatar(false)
+      setTimeout(goHome, 500)
+    }
+  }
+
   return (
     <View className='login'>
       <Image className='login__cover' src={LOGIN_COVER} mode='aspectFill' />
 
       <View className='login__content'>
-        <View className='login__panel'>
-          <Button
-            className='login__avatar'
-            openType='chooseAvatar'
-            onChooseAvatar={handleChooseAvatar}
-          >
-            {avatarTempPath ? (
-              <Image
-                className='login__avatar-img'
-                src={avatarTempPath}
-                mode='aspectFill'
-              />
-            ) : (
-              <Text className='login__avatar-plus'>＋</Text>
-            )}
-          </Button>
-          <Text className='login__avatar-tip'>点击授权微信头像</Text>
+        {askAvatar ? (
+          <View className='login__panel'>
+            <View className='login__avatar-tip-icon'>🐾</View>
+            <Text className='login__sheet-title'>使用微信头像</Text>
+            <Text className='login__sheet-desc'>
+              用微信头像作为会员头像，到店时店员更好认
+            </Text>
 
-          <Button
-            className='login__btn'
-            openType='getPhoneNumber'
-            onGetPhoneNumber={handleGetPhoneNumber}
-            loading={loading}
-          >
-            微信手机号一键登录
-          </Button>
-          <Text className='login__tip'>
-            登录即代表同意授权手机号用于预约与会员服务
-          </Text>
-        </View>
+            <Button
+              className='login__btn'
+              openType='chooseAvatar'
+              onChooseAvatar={handleChooseAvatar}
+              loading={savingAvatar}
+            >
+              使用微信头像
+            </Button>
+            <Text className='login__sheet-skip' onClick={goHome}>
+              暂不设置，先去逛逛
+            </Text>
+          </View>
+        ) : (
+          <View className='login__panel'>
+            <Button
+              className='login__btn'
+              openType='getPhoneNumber'
+              onGetPhoneNumber={handleGetPhoneNumber}
+              loading={loading}
+            >
+              微信手机号一键登录
+            </Button>
+            <Text className='login__tip'>
+              登录即代表同意授权手机号用于预约与会员服务
+            </Text>
+          </View>
+        )}
       </View>
     </View>
   )

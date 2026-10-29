@@ -1,7 +1,8 @@
 export default definePageConfig({
   navigationBarTitleText: '登录',
-  navigationBarBackgroundColor: '#FCEFD8',
+  // 封面图顶部是浅色店招，用白色导航栏过渡更自然
+  navigationBarBackgroundColor: '#FFFFFF',
   navigationBarTextStyle: 'black',
-  backgroundColor: '#FCEFD8',
+  backgroundColor: '#FFFFFF',
   disableScroll: true,
 })
