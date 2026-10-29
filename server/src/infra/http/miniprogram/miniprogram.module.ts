@@ -25,10 +25,7 @@ import { MiniprogramPetController } from './miniprogram-pet.controller';
 import { MiniprogramServiceController } from './miniprogram-service.controller';
 import { MiniprogramAppointmentController } from './miniprogram-appointment.controller';
 import { MiniprogramMeController } from './miniprogram-me.controller';
-import { MiniprogramRecordsController } from './miniprogram-records.controller';
 import { MiniprogramUploadController } from './miniprogram-upload.controller';
-import { GetCustomerConsumptionRecordsService } from '@app/use-cases/customer/get-customer-consumption-records-service';
-import { ListPointsRecordsService } from '@app/use-cases/member/list-points-records-service';
 
 @Module({
   imports: [DatabaseModule, CustomerAuthModule],
@@ -38,7 +35,6 @@ import { ListPointsRecordsService } from '@app/use-cases/member/list-points-reco
     MiniprogramServiceController,
     MiniprogramAppointmentController,
     MiniprogramMeController,
-    MiniprogramRecordsController,
     MiniprogramUploadController,
   ],
   providers: [
@@ -54,8 +50,6 @@ import { ListPointsRecordsService } from '@app/use-cases/member/list-points-reco
     GetAppointmentAvailabilityService,
     GetMyMemberInfoService,
     UpdateMyProfileService,
-    GetCustomerConsumptionRecordsService,
-    ListPointsRecordsService,
     UploadImageService,
     {
       provide: ImageStorage,

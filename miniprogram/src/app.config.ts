@@ -9,8 +9,6 @@ export default defineAppConfig({
     'pages/pet-edit/index',
     'pages/booking/index',
     'pages/profile-edit/index',
-    'pages/consumption-records/index',
-    'pages/points-records/index',
   ],
   window: {
     backgroundTextStyle: 'light',

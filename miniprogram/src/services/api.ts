@@ -4,14 +4,12 @@ import { API_BASE_URL } from '../constants/config'
 import { getAccessToken } from '../utils/auth'
 import type {
   Appointment,
-  ConsumptionRecord,
   CreateAppointmentInput,
   CustomerAuthResult,
   Me,
   Pet,
   PetInput,
   PetshopService,
-  PointsRecord,
 } from '../types'
 
 export function login(code: string, phoneCode: string) {
@@ -77,19 +75,6 @@ export function cancelAppointment(id: string) {
     `/miniprogram/appointments/${id}/cancel`,
     { method: 'POST' },
   )
-}
-
-export function getConsumptionRecords(page = 1, pageSize = 20) {
-  return request<{
-    records: ConsumptionRecord[]
-    total: number
-    page: number
-    pageSize: number
-  }>(`/miniprogram/consumption-records?page=${page}&pageSize=${pageSize}`)
-}
-
-export function getPointsRecords() {
-  return request<{ records: PointsRecord[] }>('/miniprogram/points-records')
 }
 
 // 上传图片（multipart/form-data），返回图片 URL

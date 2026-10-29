@@ -63,27 +63,6 @@ export interface Appointment {
   service?: PetshopService
 }
 
-export interface ConsumptionRecord {
-  id: string
-  type: 'PRODUCT' | 'SERVICE'
-  date: string
-  amount: number // 单位：分
-  status: string
-  items: string[]
-  note?: string
-}
-
-export type PointsAction = 'ADD' | 'DEDUCT' | 'CONSUME' | 'EXPIRE'
-
-export interface PointsRecord {
-  id: string
-  action: PointsAction
-  points: number
-  balance: number
-  reason: string
-  createdAt: string
-}
-
 export type MemberLevel = 'REGULAR' | 'VIP'
 
 export interface Me {
