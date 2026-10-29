@@ -96,4 +96,76 @@ describe('HttpWechatApiClient', () => {
       await expect(client.getPhoneNumber('phone-code')).rejects.toThrow(WechatApiError);
     });
   });
+
+  describe('access_token 缓存', () => {
+    afterEach(() => {
+      jest.restoreAllMocks();
+    });
+
+    it('有效期（expires_in）到点后重新获取，不会永久复用', async () => {
+      let tokenCalls = 0;
+      const fetch = fakeFetch((url: string) => {
+        if (url.includes('cgi-bin/token')) {
+          tokenCalls += 1;
+          return { access_token: `token-${tokenCalls}`, expires_in: 7200 };
+        }
+        return { errcode: 0, phone_info: { purePhoneNumber: '13800138000' } };
+      });
+
+      const now = 1_700_000_000_000;
+      jest.spyOn(Date, 'now').mockReturnValue(now);
+
+      const client = new HttpWechatApiClient(appId, appSecret, fetch);
+
+      await client.getPhoneNumber('c1');
+      expect(tokenCalls).toBe(1);
+
+      // 仍在有效期内：复用缓存
+      jest.spyOn(Date, 'now').mockReturnValue(now + 60 * 60 * 1000);
+      await client.getPhoneNumber('c2');
+      expect(tokenCalls).toBe(1);
+
+      // 超过 2 小时有效期：必须重新获取
+      jest.spyOn(Date, 'now').mockReturnValue(now + 7200 * 1000 + 1000);
+      await client.getPhoneNumber('c3');
+      expect(tokenCalls).toBe(2);
+    });
+
+    it('遇到 42001（access_token 过期）时刷新 token 并重试一次', async () => {
+      let tokenCalls = 0;
+      let phoneCalls = 0;
+      const fetch = fakeFetch((url: string) => {
+        if (url.includes('cgi-bin/token')) {
+          tokenCalls += 1;
+          return { access_token: `token-${tokenCalls}`, expires_in: 7200 };
+        }
+        phoneCalls += 1;
+        if (phoneCalls === 1) {
+          return { errcode: 42001, errmsg: 'access_token expired' };
+        }
+        return { errcode: 0, phone_info: { purePhoneNumber: '13800138000' } };
+      });
+
+      const client = new HttpWechatApiClient(appId, appSecret, fetch);
+      const result = await client.getPhoneNumber('phone-code');
+
+      expect(result.phoneNumber).toBe('13800138000');
+      expect(tokenCalls).toBe(2);
+    });
+
+    it('刷新 token 后仍然失败，则抛出 WechatApiError', async () => {
+      const fetch = fakeFetch((url: string) => {
+        if (url.includes('cgi-bin/token')) {
+          return { access_token: 'access-token', expires_in: 7200 };
+        }
+        return { errcode: 42001, errmsg: 'access_token expired' };
+      });
+
+      const client = new HttpWechatApiClient(appId, appSecret, fetch);
+
+      await expect(client.getPhoneNumber('phone-code')).rejects.toMatchObject({
+        errcode: 42001,
+      });
+    });
+  });
 });

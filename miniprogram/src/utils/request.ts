@@ -65,6 +65,12 @@ export async function request<T>(
   }
 
   if (res.statusCode === 401) {
+    // 登录接口自身的 401 是微信凭证/授权无效，不是登录态过期：
+    // 既不能清 token，也不能跳转（否则在登录页无限重定向）
+    if (!auth) {
+      throw new ApiError(401, extractMessage(res.data))
+    }
+
     // 登录态失效：清除本地 token 并跳转登录（登录接口幂等，可静默重新登录）
     clearAuth()
     redirectToLogin()

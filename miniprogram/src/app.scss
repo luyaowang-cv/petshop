@@ -2,9 +2,9 @@
 /* 只放颜色变量（无单位），避免 pxtransform 对变量内数值的处理差异。
    想换主色，改 --c-primary / --c-primary-dark / --c-primary-soft 三处即可。 */
 page {
-  --c-primary: #ff7a45;
-  --c-primary-dark: #e85a28;
-  --c-primary-soft: #fff1ea;
+  --c-primary: #1d4ed8;
+  --c-primary-dark: #16337f;
+  --c-primary-soft: #eef3ff;
   --c-text: #2b2f36;
   --c-text-2: #6b7280;
   --c-text-3: #9b9fa6;
@@ -81,7 +81,7 @@ page {
 
 .btn-primary.is-disabled,
 .btn-primary.btn-disabled {
-  background: #ffc7ae;
+  background: #b3c4f2;
 }
 
 .btn-ghost {
