@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useState } from "react";
 import {
   Card,
   Table,
@@ -8,28 +8,15 @@ import {
   Space,
   Tag,
   Modal,
-  Select,
-  message,
-  Statistic,
-  Row,
-  Col,
   DatePicker,
-  Popconfirm,
   Avatar,
   Descriptions,
   Divider,
 } from "antd";
-import {
-  EyeOutlined,
-  ShoppingCartOutlined,
-  DollarOutlined,
-  CheckCircleOutlined,
-  UserOutlined,
-} from "@ant-design/icons";
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { EyeOutlined, UserOutlined } from "@ant-design/icons";
+import { useQuery } from "@tanstack/react-query";
 import {
   fetchProductOrders,
-  updateProductOrderStatus,
   PRODUCT_ORDER_KEY,
 } from "@/services/queries/ProductOrder";
 import { fetchCustomers, CUSTOMER_KEY } from "@/services/queries/Customer";
@@ -39,13 +26,15 @@ import type { ColumnsType } from "antd/es/table";
 
 const { RangePicker } = DatePicker;
 
-// 状态标签配置（简化版：只有已支付和已完成）
-const statusConfig = {
+// 状态标签配置：收银台成交即为「已支付」，不再有「已完成」流程
+const statusConfig: Record<string, { color: string; text: string }> = {
   [ProductOrderStatus.PENDING]: { color: "orange", text: "待支付" }, // 保留但不使用
   [ProductOrderStatus.CONFIRMED]: { color: "blue", text: "已支付" },
-  [ProductOrderStatus.COMPLETED]: { color: "green", text: "已完成" },
   [ProductOrderStatus.CANCELED]: { color: "red", text: "已取消" }, // 保留但不使用
 };
+
+const getStatusConfig = (status: ProductOrderStatus) =>
+  statusConfig[status] ?? { color: "default", text: status };
 
 // 格式化价格（分转元）
 const formatPrice = (price: number) => {
@@ -65,14 +54,9 @@ const generateOrderNumber = (date: string) => {
 };
 
 export default function OrdersPage() {
-  const queryClient = useQueryClient();
-
   // 状态管理
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [selectedOrder, setSelectedOrder] = useState<ProductOrder | null>(null);
-  const [statusFilter, setStatusFilter] = useState<
-    ProductOrderStatus | undefined
-  >();
   const [dateRange, setDateRange] = useState<[string, string] | undefined>();
 
   // 数据查询
@@ -80,14 +64,12 @@ export default function OrdersPage() {
     queryKey: [
       PRODUCT_ORDER_KEY,
       {
-        status: statusFilter,
         startDate: dateRange?.[0],
         endDate: dateRange?.[1],
       },
     ],
     queryFn: () =>
       fetchProductOrders({
-        status: statusFilter,
         startDate: dateRange?.[0],
         endDate: dateRange?.[1],
       }),
@@ -98,56 +80,10 @@ export default function OrdersPage() {
     queryFn: fetchCustomers,
   });
 
-  // 更新订单状态
-  const updateStatusMutation = useMutation({
-    mutationFn: ({ id, status }: { id: string; status: ProductOrderStatus }) =>
-      updateProductOrderStatus(id, status),
-    onSuccess: () => {
-      message.success("订单状态更新成功");
-      queryClient.invalidateQueries({ queryKey: [PRODUCT_ORDER_KEY] });
-      setIsDetailModalOpen(false);
-    },
-    onError: (error: any) => {
-      message.error(error.response?.data?.message || "订单状态更新失败");
-    },
-  });
-
-  // 统计数据
-  const statistics = useMemo(() => {
-    const orders = ordersData?.orders || [];
-    const total = orders.length;
-    const confirmed = orders.filter(
-      (o) => o.status === ProductOrderStatus.CONFIRMED,
-    ).length;
-    const completed = orders.filter(
-      (o) => o.status === ProductOrderStatus.COMPLETED,
-    ).length;
-
-    // 今日销售额（已支付和已完成订单）
-    const today = dayjs().format("YYYY-MM-DD");
-    const todaySales = orders
-      .filter(
-        (o) =>
-          (o.status === ProductOrderStatus.CONFIRMED ||
-            o.status === ProductOrderStatus.COMPLETED) &&
-          dayjs(o.createdAt).format("YYYY-MM-DD") === today,
-      )
-      .reduce((sum, o) => sum + o.totalAmount, 0);
-
-    return { total, confirmed, completed, todaySales };
-  }, [ordersData]);
-
   // 查看订单详情
   const handleViewDetail = (order: ProductOrder) => {
     setSelectedOrder(order);
     setIsDetailModalOpen(true);
-  };
-
-  // 更新订单状态
-  const handleUpdateStatus = (status: ProductOrderStatus) => {
-    if (selectedOrder) {
-      updateStatusMutation.mutate({ id: selectedOrder.id, status });
-    }
   };
 
   // 获取客户信息
@@ -232,129 +168,51 @@ export default function OrdersPage() {
       dataIndex: "status",
       key: "status",
       width: 100,
-      render: (status: ProductOrderStatus) => (
-        <Tag color={statusConfig[status].color}>
-          {statusConfig[status].text}
-        </Tag>
-      ),
+      render: (status: ProductOrderStatus) => {
+        const config = getStatusConfig(status);
+        return <Tag color={config.color}>{config.text}</Tag>;
+      },
     },
     {
       title: "操作",
       key: "action",
-      width: 150,
+      width: 100,
       fixed: "right",
       render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="link"
-            size="small"
-            icon={<EyeOutlined />}
-            onClick={() => handleViewDetail(record)}
-          >
-            详情
-          </Button>
-          {record.status === ProductOrderStatus.CONFIRMED && (
-            <Button
-              type="link"
-              size="small"
-              onClick={() =>
-                updateStatusMutation.mutate({
-                  id: record.id,
-                  status: ProductOrderStatus.COMPLETED,
-                })
-              }
-            >
-              完成
-            </Button>
-          )}
-        </Space>
+        <Button
+          type="link"
+          size="small"
+          icon={<EyeOutlined />}
+          onClick={() => handleViewDetail(record)}
+        >
+          详情
+        </Button>
       ),
     },
   ];
 
   return (
     <div style={{ padding: "24px" }}>
-      {/* 统计卡片 */}
-      <Row gutter={16} style={{ marginBottom: 24 }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="总订单数"
-              value={statistics.total}
-              prefix={<ShoppingCartOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="已支付"
-              value={statistics.confirmed}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="已完成"
-              value={statistics.completed}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="今日销售额"
-              value={statistics.todaySales / 100}
-              prefix={<DollarOutlined />}
-              precision={2}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-      </Row>
-
       {/* 订单列表 */}
       <Card
         title="商品订单"
         extra={
-          <Space>
-            <Select
-              placeholder="订单状态"
-              style={{ width: 120 }}
-              allowClear
-              value={statusFilter}
-              onChange={setStatusFilter}
-            >
-              <Select.Option value={ProductOrderStatus.CONFIRMED}>
-                已支付
-              </Select.Option>
-              <Select.Option value={ProductOrderStatus.COMPLETED}>
-                已完成
-              </Select.Option>
-            </Select>
-            <RangePicker
-              onChange={(dates) => {
-                if (dates) {
-                  setDateRange([
-                    dates[0]!.format("YYYY-MM-DD"),
-                    dates[1]!.format("YYYY-MM-DD"),
-                  ]);
-                } else {
-                  setDateRange(undefined);
-                }
-              }}
-            />
-          </Space>
+          <RangePicker
+            onChange={(dates) => {
+              if (dates) {
+                setDateRange([
+                  dates[0]!.format("YYYY-MM-DD"),
+                  dates[1]!.format("YYYY-MM-DD"),
+                ]);
+              } else {
+                setDateRange(undefined);
+              }
+            }}
+          />
         }
       >
         <div style={{ marginBottom: 16, color: "#666", fontSize: 12 }}>
-          💡 提示：收银台结算后订单自动为"已支付"状态，可标记为"已完成"
+          💡 提示：收银台结算后订单即为「已支付」（库存、积分、收入已入账），并计入商品销量统计。
         </div>
         <Table
           columns={columns}
@@ -380,35 +238,7 @@ export default function OrdersPage() {
           setSelectedOrder(null);
         }}
         footer={
-          selectedOrder?.status === ProductOrderStatus.CONFIRMED
-            ? [
-                <Button
-                  key="cancel"
-                  onClick={() => setIsDetailModalOpen(false)}
-                >
-                  关闭
-                </Button>,
-                <Popconfirm
-                  key="complete"
-                  title="完成订单"
-                  description="确定要完成这个订单吗？"
-                  onConfirm={() =>
-                    handleUpdateStatus(ProductOrderStatus.COMPLETED)
-                  }
-                >
-                  <Button
-                    type="primary"
-                    loading={updateStatusMutation.isPending}
-                  >
-                    完成订单
-                  </Button>
-                </Popconfirm>,
-              ]
-            : [
-                <Button key="close" onClick={() => setIsDetailModalOpen(false)}>
-                  关闭
-                </Button>,
-              ]
+          <Button onClick={() => setIsDetailModalOpen(false)}>关闭</Button>
         }
         width={700}
       >
@@ -446,8 +276,8 @@ export default function OrdersPage() {
                 })()}
               </Descriptions.Item>
               <Descriptions.Item label="订单状态" span={2}>
-                <Tag color={statusConfig[selectedOrder.status].color}>
-                  {statusConfig[selectedOrder.status].text}
+                <Tag color={getStatusConfig(selectedOrder.status).color}>
+                  {getStatusConfig(selectedOrder.status).text}
                 </Tag>
               </Descriptions.Item>
             </Descriptions>

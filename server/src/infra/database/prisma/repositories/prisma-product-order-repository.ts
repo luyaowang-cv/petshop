@@ -57,7 +57,9 @@ export class PrismaProductOrderRepository implements ProductOrderRepository {
     }
 
     if (filters?.status) {
-      where.status = filters.status;
+      where.status = Array.isArray(filters.status)
+        ? { in: filters.status }
+        : filters.status;
     }
 
     if (filters?.startDate || filters?.endDate) {
@@ -70,9 +72,11 @@ export class PrismaProductOrderRepository implements ProductOrderRepository {
       }
     }
 
+    // 未传分页参数时返回全部记录（统计类查询需要完整数据）
     const page = pagination?.page || 1;
     const pageSize = pagination?.pageSize || 10;
-    const skip = (page - 1) * pageSize;
+    const skip = pagination ? (page - 1) * pageSize : undefined;
+    const take = pagination ? pageSize : undefined;
 
     const [orders, total] = await Promise.all([
       this.prisma.productOrder.findMany({
@@ -85,7 +89,7 @@ export class PrismaProductOrderRepository implements ProductOrderRepository {
           },
         },
         skip,
-        take: pageSize,
+        take,
         orderBy: sort?.sortBy
           ? { [sort.sortBy]: sort.sortOrder || 'desc' }
           : { createdAt: 'desc' },

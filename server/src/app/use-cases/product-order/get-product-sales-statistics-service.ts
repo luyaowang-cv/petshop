@@ -62,13 +62,14 @@ export class GetProductSalesStatisticsService {
     const defaultStartDate = new Date(defaultEndDate);
     defaultStartDate.setDate(defaultStartDate.getDate() - 29);
 
-    const actualStartDate = startDate || defaultStartDate;
-    const actualEndDate = endDate || defaultEndDate;
+    const actualStartDate = this.startOfDay(startDate || defaultStartDate);
+    const actualEndDate = this.endOfDay(endDate || defaultEndDate);
 
-    // 获取订单数据（只统计已完成的订单）
+    // 获取订单数据：已支付（CONFIRMED）和已完成（COMPLETED）都代表真实成交，
+    // 收银台结算后订单状态即为 CONFIRMED，若只统计 COMPLETED 会查不到数据。
     const { orders } = await this.productOrderRepository.findMany(
       {
-        status: ProductOrderStatus.COMPLETED,
+        status: [ProductOrderStatus.CONFIRMED, ProductOrderStatus.COMPLETED],
         startDate: actualStartDate,
         endDate: actualEndDate,
       },
@@ -241,6 +242,30 @@ export class GetProductSalesStatisticsService {
     }
 
     return trendData;
+  }
+
+  private startOfDay(date: Date): Date {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      0,
+      0,
+      0,
+      0,
+    );
+  }
+
+  private endOfDay(date: Date): Date {
+    return new Date(
+      date.getFullYear(),
+      date.getMonth(),
+      date.getDate(),
+      23,
+      59,
+      59,
+      999,
+    );
   }
 
   private formatDate(date: Date): string {

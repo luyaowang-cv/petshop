@@ -18,6 +18,19 @@ import { UpdateProductOrderStatusService } from 'src/app/use-cases/product-order
 import { GetProductSalesStatisticsService } from 'src/app/use-cases/product-order/get-product-sales-statistics-service';
 import { ProductOrderViewModel } from '../view-models/product-order-view-model';
 
+// 前端传的是 YYYY-MM-DD，按本地时区的当天 00:00 / 23:59:59 解析，
+// 避免 new Date('YYYY-MM-DD') 按 UTC 解析导致漏掉当天订单。
+function parseDateBoundary(value: string, endOfDay: boolean): Date {
+  const dateOnly = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value);
+  if (!dateOnly) {
+    return new Date(value);
+  }
+  const [, year, month, day] = dateOnly;
+  return endOfDay
+    ? new Date(Number(year), Number(month) - 1, Number(day), 23, 59, 59, 999)
+    : new Date(Number(year), Number(month) - 1, Number(day));
+}
+
 @Controller('product-orders')
 export class ProductOrdersController {
   constructor(
@@ -56,11 +69,11 @@ export class ProductOrdersController {
     }
 
     if (query.startDate) {
-      filters.startDate = new Date(query.startDate);
+      filters.startDate = parseDateBoundary(query.startDate, false);
     }
 
     if (query.endDate) {
-      filters.endDate = new Date(query.endDate);
+      filters.endDate = parseDateBoundary(query.endDate, true);
     }
 
     const pagination = {
@@ -122,8 +135,12 @@ export class ProductOrdersController {
 
   @Get('statistics/sales')
   async getSalesStatistics(@Query() query: ProductSalesQuery) {
-    const startDate = query.startDate ? new Date(query.startDate) : undefined;
-    const endDate = query.endDate ? new Date(query.endDate) : undefined;
+    const startDate = query.startDate
+      ? parseDateBoundary(query.startDate, false)
+      : undefined;
+    const endDate = query.endDate
+      ? parseDateBoundary(query.endDate, true)
+      : undefined;
 
     const statistics = await this.getProductSalesStatisticsService.execute({
       startDate,

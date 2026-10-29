@@ -4,7 +4,7 @@ import { SortOptions } from './utils/sort';
 
 export interface ProductOrderFilters {
   customerId?: string;
-  status?: string;
+  status?: string | string[];
   startDate?: Date;
   endDate?: Date;
 }

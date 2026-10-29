@@ -12,9 +12,6 @@ import {
   Input,
   Form,
   InputNumber,
-  Row,
-  Col,
-  Statistic,
   Avatar,
   Select,
   Upload,
@@ -246,19 +243,6 @@ export default function Services() {
       }
       return true;
     }) || [];
-
-  // 统计数据
-  const totalServices = servicesData?.services?.length || 0;
-  const activeServices =
-    servicesData?.services?.filter((s) => s.status === ServiceStatus.ACTIVE)
-      .length || 0;
-
-  const categoryStats = categories.map((category) => ({
-    category,
-    count:
-      servicesData?.services?.filter((s) => s.categoryId === category.id)
-        .length || 0,
-  }));
 
   // 分类配色循环使用
   const CATEGORY_COLORS = ["blue", "red", "green", "purple", "orange", "cyan"];
@@ -538,42 +522,6 @@ export default function Services() {
 
   return (
     <div style={{ padding: "16px" }}>
-      {/* 统计卡片 */}
-      <Row gutter={16} style={{ marginBottom: 16 }}>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="服务总数"
-              value={totalServices}
-              prefix={<AppstoreOutlined />}
-              valueStyle={{ color: "#1890ff" }}
-            />
-          </Card>
-        </Col>
-        <Col span={6}>
-          <Card>
-            <Statistic
-              title="启用服务"
-              value={activeServices}
-              prefix={<CheckCircleOutlined />}
-              valueStyle={{ color: "#52c41a" }}
-            />
-          </Card>
-        </Col>
-        {categoryStats.slice(0, 3).map(({ category, count }, index) => (
-          <Col span={4} key={category.id}>
-            <Card>
-              <Statistic
-                title={`${category.icon ?? ""} ${category.name}`.trim()}
-                value={count}
-                prefix={<TagsOutlined />}
-                valueStyle={{ color: CATEGORY_HEX[index % CATEGORY_HEX.length] }}
-              />
-            </Card>
-          </Col>
-        ))}
-      </Row>
-
       <Card
         title={
           <div
